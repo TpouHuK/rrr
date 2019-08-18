@@ -38,14 +38,7 @@ fn mane() {
     
     let script = get_script();
     lua.context(move |lua_ctx|{
-        let mut motor_pair = line::MotorPair::new();
-        let mut sensor_pair = line::SensorPair::new();
         
-        let mut cross_line = move |_c, (p, i, d, speed):(f32, f32, f32, i32)| {
-            line::ride_line_cross(p, i, d, speed, 0, &mut motor_pair, &mut sensor_pair);
-            Ok(())
-        };
-
         let set_middle_grey= |_c, val: i32| {
             line::set_middle_grey(val);
             Ok(())
@@ -266,7 +259,5 @@ fn main() {
 
 fn maine() {
     line::set_middle_grey(50);
-    let mut motor_pair = line::MotorPair::new();
-    let mut sensor_pair = line::SensorPair::new();
     line::turn_right_on_line(&mut motor_pair, &mut sensor_pair);
 }
