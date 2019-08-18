@@ -1,0 +1,96 @@
+use std::fs::File;
+use std::path::Path;
+
+use serde_json;
+use vec2d;
+
+#[derive(Debug, Copy, Clone)]
+pub enum Edge{
+    Empty,
+    CrossLine,
+}
+
+
+#[derive(Debug, Copy, Clone)]
+pub struct Neighbour{
+    id: i16,
+    angle: i16,
+}
+
+#[derive(Debug, Clone)]
+pub struct Point<'a> {
+    x: i32,
+    y: i32,
+    kind: i32,
+    name: &'a str,
+    neighbors: Vec<Neighbour>,
+}
+
+pub fn load_json(file_name: &str){
+    let json_file_path = Path::new(file_name);
+    let json_file = File::open(json_file_path).unwrap();
+
+    let deserialized_data: serde_json::Value =
+        serde_json::from_reader(json_file).unwrap();
+
+    // Points deserialization
+    let point_names: &Vec<serde_json::Value> = deserialized_data.get("pnames")
+                                                                .unwrap()
+                                                                .as_array()
+                                                                .unwrap();
+    
+    let point_values: &Vec<serde_json::Value> = deserialized_data.get("pvals")
+                                                                 .unwrap()
+                                                                 .as_array()
+                                                                 .unwrap();
+    let pcount = point_names.len();
+
+    let mut points = Vec::with_capacity(pcount);
+
+    for a in point_names.iter().zip(point_values.iter()) {
+        let (name, data) = a;
+
+        let neighbors_json = data.get("neighbors").unwrap().as_array().unwrap();
+        let mut neighbors_ready = Vec::with_capacity(neighbors_json.len());
+
+        for a in neighbors_json.iter() {
+            neighbors_ready.push(
+                Neighbour{
+                    id: a.get("id").unwrap().as_i64().unwrap() as i16,
+                    angle: a.get("ang").unwrap().as_i64().unwrap() as i16,
+                         })
+        }
+
+        let point = Point{
+            x: data.get("x").unwrap().as_i64().unwrap() as i32,
+            y: data.get("y").unwrap().as_i64().unwrap() as i32,
+            kind: data.get("kind").unwrap().as_i64().unwrap() as i32,
+            name: name.as_str().unwrap(),
+            neighbors: neighbors_ready,};
+        points.push(point);
+    }
+
+    // Matrix deserialization
+    let raw_matrix = deserialized_data.get("adjacencymatrix")
+                                  .unwrap()
+                                  .as_array()
+                                  .unwrap();
+
+    let mut matrix = Vec::with_capacity(pcount);
+
+    for e in raw_matrix.iter() {
+        let e_type = e.get("type").unwrap().as_i64().unwrap() as i32;
+        let e_value = e.get("value").unwrap().as_i64().unwrap() as i32;
+        if e_type == 0 {
+            if e_value == 1 {
+                matrix.push(Edge::CrossLine);
+            } else {
+                matrix.push(Edge::Empty);
+            }
+        } else {
+            unimplemented!();
+        }
+    }
+
+    let matrix = vec2d::Vec2D::from_vec(vec2d::Size::new(pcount, pcount), matrix).unwrap();
+}
