@@ -1,0 +1,10 @@
+# var_list
+CUR_ANG = int32
+CUR_POINT = "STRING"
+
+# func list
+set_speed(i32)
+set_pid(f32, f32, f32)
+goto_point(String)
+set_middle_grey(i32)
+wait_till_arrival()
