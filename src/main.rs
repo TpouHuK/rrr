@@ -409,36 +409,34 @@ fn main() {
             }
         }
 
-        create_lua_func!(lua_ctx, set_middle_grey, "set_middle_grey");
-        create_lua_func!(lua_ctx, set_black, "set_black");
-        create_lua_func!(lua_ctx, set_white, "set_white");
-        create_lua_func!(lua_ctx, wait_till_arrival, "wait_till_arrival");
+        create_lua_func!(lua_ctx, set_middle_grey, "r_set_middle_grey");
+        create_lua_func!(lua_ctx, set_black, "r_set_black");
+        create_lua_func!(lua_ctx, set_white, "r_set_white");
+        create_lua_func!(lua_ctx, set_pid, "r_set_pid");
+        create_lua_func!(lua_ctx, set_pidb, "r_set_pidb");
+        create_lua_func!(lua_ctx, set_lspeed, "r_set_lspeed");
+        create_lua_func!(lua_ctx, set_rspeed, "r_set_rspeed");
+        create_lua_func!(lua_ctx, set_mspeed, "r_set_mspeed");
 
         create_lua_func!(lua_ctx, goto_point, "r_goto_point");
-        create_lua_func!(lua_ctx, rotate_to_point, "rotate_to_point");
+        create_lua_func!(lua_ctx, rotate_to_point, "r_rotate_to_point");
         create_lua_func!(lua_ctx, run_macro, "r_macro");
-
         create_lua_func!(lua_ctx, run_unmacro, "r_unmacro");
-        create_lua_func!(lua_ctx, ride_line_degrees, "ride_line_degrees");
-        create_lua_func!(lua_ctx, ride_outer_line_left_stop, "rolls");
+        create_lua_func!(lua_ctx, ride_line_degrees, "r_ride_line_degrees");
+        create_lua_func!(lua_ctx, ride_outer_line_left_stop, "r_rolls");
         create_lua_func!(lua_ctx, ride_degrees, "r_ride_degrees");
+        create_lua_func!(lua_ctx, wait_till_arrival, "r_wait_till_arrival");
 
-        create_lua_func!(lua_ctx, get_cs_hsv, "get_cs_hsv");
+        create_lua_func!(lua_ctx, get_cs_hsv, "r_get_cs_hsv");
 
-        create_lua_func!(lua_ctx, set_pid, "set_pid");
-        create_lua_func!(lua_ctx, set_pidb, "set_pidb");
+        create_lua_func!(lua_ctx, set_lift, "r_set_lift");
+        create_lua_func!(lua_ctx, set_rotate, "r_set_rotate");
 
-        create_lua_func!(lua_ctx, set_lspeed, "set_lspeed");
-        create_lua_func!(lua_ctx, set_rspeed, "set_rspeed");
-        create_lua_func!(lua_ctx, set_mspeed, "set_mspeed");
+        create_lua_func!(lua_ctx, joystick_write, "r_joystick_write");
+        create_lua_func!(lua_ctx, joystick_line, "r_joystick_line");
 
+        // No r_sleep, special case >_<
         create_lua_func!(lua_ctx, lua_sleep, "sleep");
-
-        create_lua_func!(lua_ctx, set_lift, "set_lift");
-        create_lua_func!(lua_ctx, set_rotate, "set_rotate");
-
-        create_lua_func!(lua_ctx, joystick_write, "joystick_write");
-        create_lua_func!(lua_ctx, joystick_line, "joystick_line");
 
         // Setuping global vars
         lua_ctx.globals().set("CUR_ANG", 0);

@@ -52,6 +52,7 @@ pub struct Lift{
 
 pub struct Rotate {
     motor: MediumMotor,
+    pos: i32,
 }
 
 impl Lift {
@@ -87,16 +88,36 @@ impl Rotate {
         motor.set_position(0).unwrap();
         return Rotate {
             motor: motor,
+            pos: 0,
         }
     }
 
     pub fn set_point(&mut self, point:i32) {
-        self.motor.set_position_sp(point as isize).unwrap();
+        let mut cur_pos = (self.pos % 360);
+        if cur_pos < 0 { cur_pos = cur_pos + 360 }
+        let diff = point - cur_pos;
+        let mut target;
+
+        if diff > 180 {
+            target = diff - 360;
+        } else if diff < -180 {
+            target = diff + 360;
+        } else {
+            target = diff;
+        }
+
+        self.motor.set_position_sp((self.pos + target) as isize).unwrap();
+        self.pos += target;
         self.motor.set_speed_sp(250).unwrap();
         self.motor.run_to_abs_pos(None).unwrap();
         while self.motor.is_running().unwrap() {
             thread::sleep(time::Duration::from_millis(10));
         }
+    }
+
+    pub fn reset(&mut self) {
+        self.pos = 0;
+        self.motor.set_position(0).unwrap();
     }
 }
 
