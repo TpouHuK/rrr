@@ -12,9 +12,18 @@ mod graph;
 mod line;
 mod joystick;
 
+const DEFAULT_SPEED: i32 = 40;
+const DEFAULT_KP: f32 = 1.0;
+const DEFAULT_KI: f32 = 0.0;
+const DEFAULT_KD: f32 = 0.0;
+
+const LINE_DEGREES: i32 = 80;
+
 const DEFAULT_FILENAME: &str = "script.lua";
 const ENV_FILENAME_VAR: &str = "LUA_FILENAME";
-const DEGREES: i32 = 20;
+
+
+const MACRO_DEGREES: i32 = 20;
 const MACRO_SPEED: i32 = 20;
 
 fn get_script() -> String {
@@ -46,6 +55,7 @@ enum TypeOfMove {
     Macro(Vec<i32>),
     UnMacro(Vec<i32>),
     LineDegrees((i32)),
+    Degrees((i32)),
     RightOutLine,
 }
 
@@ -59,6 +69,7 @@ fn main() {
     let is_goto_running_c5 = is_goto_running.clone();
     let is_goto_running_c6 = is_goto_running.clone();
     let is_goto_running_c7 = is_goto_running.clone();
+    let is_goto_running_c8 = is_goto_running.clone();
 
     let (send_ch, receive_ch) = std::sync::mpsc::channel();
     let send_ch2 = send_ch.clone();
@@ -66,15 +77,27 @@ fn main() {
     let send_ch4 = send_ch.clone();
     let send_ch5 = send_ch.clone();
     let send_ch6 = send_ch.clone();
+    let send_ch7 = send_ch.clone();
 
-    let mut kpid = Arc::new(Mutex::new((1.0, 0.0, 0.0)));
+    let mut kpidb = Arc::new(Mutex::new((DEFAULT_KP,
+                                        DEFAULT_KI,
+                                        DEFAULT_KD)));
+    let mut kpidb_c = kpidb.clone();
+
+    let mut kpid = Arc::new(Mutex::new((DEFAULT_KP,
+                                        DEFAULT_KI,
+                                        DEFAULT_KD)));
     let mut kpid_c = kpid.clone();
 
-    let mut klspeed = Arc::new(Mutex::new(40 as i32));
+    let mut klspeed = Arc::new(Mutex::new(DEFAULT_SPEED));
     let mut klspeed_c = klspeed.clone();
     let mut klspeed_c2 = klspeed.clone();
 
-    let mut krspeed = Arc::new(Mutex::new(40 as i32));
+
+    let mut kmspeed = Arc::new(Mutex::new(MACRO_SPEED));
+    let mut kmspeed_c = kmspeed.clone();
+
+    let mut krspeed = Arc::new(Mutex::new(DEFAULT_SPEED));
     let mut krspeed_c = krspeed.clone();
     let mut cs = line::ControlSensor::new();
 
@@ -91,9 +114,11 @@ fn main() {
 
             match moveact {
                 TypeOfMove::GotoPoint(path) => {
+            let mut pidb;
             let mut pid;
             let mut lspeed;
             let mut rspeed;
+            {pidb = *kpidb.lock().unwrap()};
             {pid = *kpid.lock().unwrap()};
             {lspeed = *klspeed.lock().unwrap()};
             {rspeed = *krspeed.lock().unwrap()};
@@ -103,7 +128,7 @@ fn main() {
                     graph::MoveAction::LineRide(lineride) => {
                         match lineride {
                             graph::LineRide::CrossStop => {
-                                line::ride_line_cross(pid, lspeed, &mut robot);
+                                line::ride_line_cross(pidb, lspeed, &mut robot);
                             },
                             graph::LineRide::LeftStop=> {
                                 line::ride_line_left_stop(pid, lspeed, &mut robot);
@@ -112,35 +137,39 @@ fn main() {
                                 line::ride_line_right_stop(pid, lspeed, &mut robot);
                             },
                         }
-                        robot.motor_pair.go_on_degrees(lspeed, 70);
+                        robot.motor_pair.go_on_degrees(lspeed, LINE_DEGREES);
                     },
                     graph::MoveAction::Rotate(count) => {
+                        robot.motor_pair.set_steering(0, 0);
+                        thread::sleep(time::Duration::from_millis(100));
                         line::turn_count(&mut robot, count, rspeed);
                     }
                 }
-            //robot.motor_pair.set_steering(0, 0);
-            //thread::sleep(time::Duration::from_secs(2));
             }
             robot.motor_pair.set_steering(0, 0);
             },
                 TypeOfMove::Macro(steerings) => {
+                    let mut mspeed;
+                    {mspeed = *kmspeed.lock().unwrap()};
                     for steering in steerings.iter() {
-                        robot.motor_pair.steer_on_degrees(*steering, MACRO_SPEED, DEGREES);
+                        robot.motor_pair.steer_on_degrees(*steering, mspeed, MACRO_DEGREES);
                     }
                     robot.motor_pair.set_steering(0, 0);
                 },
                 TypeOfMove::UnMacro(steerings) => {
+                    let mut mspeed;
+                    {mspeed = *kmspeed.lock().unwrap()};
                     for steering in steerings.iter() {
-                        robot.motor_pair.steer_on_degrees(*steering, -MACRO_SPEED, DEGREES);
+                        robot.motor_pair.steer_on_degrees(*steering, -mspeed, MACRO_DEGREES);
                     }
                     robot.motor_pair.set_steering(0, 0);
                 },
                 TypeOfMove::LineDegrees(degrees) => {
-                    let mut pid;
+                    let mut pidb;
                     let mut lspeed;
-                    {pid = *kpid.lock().unwrap()};
+                    {pidb = *kpidb.lock().unwrap()};
                     {lspeed = *klspeed.lock().unwrap()};
-                    line::ride_line_degrees(pid, lspeed, &mut robot, degrees);
+                    line::ride_line_degrees(pidb, lspeed, &mut robot, degrees);
                     robot.motor_pair.set_steering(0, 0);
                 },
                 TypeOfMove::RightOutLine => {
@@ -149,6 +178,12 @@ fn main() {
                     {pid = *kpid.lock().unwrap()};
                     {lspeed = *klspeed.lock().unwrap()};
                     line::ride_outer_line_left_stop(pid, lspeed, &mut robot);
+                    robot.motor_pair.set_steering(0, 0);
+                },
+                TypeOfMove::Degrees(degrees) => {
+                    let mut mspeed;
+                    {mspeed = *kmspeed.lock().unwrap()};
+                    robot.motor_pair.go_on_degrees(mspeed, degrees);
                     robot.motor_pair.set_steering(0, 0);
                 },
             }
@@ -182,6 +217,17 @@ fn main() {
             *speed = ispeed;
             Ok(())
         };
+        let lua_sleep = |_c, secs: u64|{
+            thread::sleep(time::Duration::from_secs(secs));
+            Ok(())
+        };
+
+        let set_mspeed = move |_c, ispeed: i32|{
+            let mutex = &*kmspeed_c;
+            let mut speed = mutex.lock().unwrap();
+            *speed = ispeed;
+            Ok(())
+        };
 
         let set_rspeed = move |_c, ispeed: i32|{
             let mutex = &*krspeed_c;
@@ -192,6 +238,13 @@ fn main() {
 
         let set_pid = move |_c: Context, (kp, ki, kd):(f32, f32, f32)|{
             let mutex = &*kpid_c;
+            let mut tuple = mutex.lock().unwrap();
+            *tuple = (kp, ki, kd);
+            Ok(())
+        };
+
+        let set_pidb = move |_c: Context, (kp, ki, kd):(f32, f32, f32)|{
+            let mutex = &*kpidb_c;
             let mut tuple = mutex.lock().unwrap();
             *tuple = (kp, ki, kd);
             Ok(())
@@ -338,48 +391,54 @@ fn main() {
             Ok(())
         };
 
-        let lua_fun = lua_ctx.create_function_mut(set_middle_grey).expect("Lua function creationg failed");
-        lua_ctx.globals().set("set_middle_grey", lua_fun).expect("Function to var in lua failed");
-        let lua_fun = lua_ctx.create_function_mut(set_black).expect("Lua function creationg failed");
-        lua_ctx.globals().set("set_black", lua_fun).expect("Function to var in lua failed");
-        let lua_fun = lua_ctx.create_function_mut(set_white).expect("Lua function creationg failed");
-        lua_ctx.globals().set("set_white", lua_fun).expect("Function to var in lua failed");
+        let ride_degrees = move |_c: Context, degrees: i32| {
+            let (mutex, condvar) = &*is_goto_running_c8;
+            {
+                let mut running = mutex.lock().unwrap();
+                *running = true;
+            }
+            send_ch7.send(TypeOfMove::Degrees(degrees)).unwrap();
+            Ok(())
+        };
 
-        let lua_fun = lua_ctx.create_function_mut(wait_till_arrival).expect("Lua function creationg failed");
-        lua_ctx.globals().set("wait_till_arrival", lua_fun).expect("Function to var in lua failed");
+        macro_rules! create_lua_func {
+            ($lua_ctx:ident, $rust_func:expr, $lua_name:expr) => {
+                $lua_ctx.globals().set($lua_name, 
+                    $lua_ctx.create_function_mut($rust_func).expect("Lua function creation failed")
+                ).expect("Function to var in lua failed");
+            }
+        }
 
-        let lua_fun = lua_ctx.create_function_mut(goto_point).expect("Lua function creationg failed");
-        lua_ctx.globals().set("goto_point", lua_fun).expect("Function to var in lua failed");
-        let lua_fun = lua_ctx.create_function_mut(rotate_to_point).expect("Lua function creationg failed");
-        lua_ctx.globals().set("rotate_to_point", lua_fun).expect("Function to var in lua failed");
-        let lua_fun = lua_ctx.create_function_mut(run_macro).expect("Lua function creationg failed");
-        lua_ctx.globals().set("macro", lua_fun).expect("Function to var in lua failed");
+        create_lua_func!(lua_ctx, set_middle_grey, "set_middle_grey");
+        create_lua_func!(lua_ctx, set_black, "set_black");
+        create_lua_func!(lua_ctx, set_white, "set_white");
+        create_lua_func!(lua_ctx, wait_till_arrival, "wait_till_arrival");
 
-        let lua_fun = lua_ctx.create_function_mut(run_unmacro).expect("Lua function creationg failed");
-        lua_ctx.globals().set("unmacro", lua_fun).expect("Function to var in lua failed");
-        let lua_fun = lua_ctx.create_function_mut(ride_line_degrees).expect("Lua function creationg failed");
-        lua_ctx.globals().set("ride_line_degrees", lua_fun).expect("Function to var in lua failed");
-        let lua_fun = lua_ctx.create_function_mut(ride_outer_line_left_stop).expect("Lua function creationg failed");
-        lua_ctx.globals().set("rolls", lua_fun).expect("Function to var in lua failed");
+        create_lua_func!(lua_ctx, goto_point, "r_goto_point");
+        create_lua_func!(lua_ctx, rotate_to_point, "rotate_to_point");
+        create_lua_func!(lua_ctx, run_macro, "r_macro");
 
-        let lua_fun = lua_ctx.create_function_mut(get_cs_hsv).expect("Lua function creationg failed");
-        lua_ctx.globals().set("get_cs_hsv", lua_fun).expect("Function to var in lua failed");
+        create_lua_func!(lua_ctx, run_unmacro, "r_unmacro");
+        create_lua_func!(lua_ctx, ride_line_degrees, "ride_line_degrees");
+        create_lua_func!(lua_ctx, ride_outer_line_left_stop, "rolls");
+        create_lua_func!(lua_ctx, ride_degrees, "r_ride_degrees");
 
-        let lua_fun = lua_ctx.create_function_mut(set_pid).expect("Lua function creationg failed");
-        lua_ctx.globals().set("set_pid", lua_fun).expect("Function to var in lua failed");
+        create_lua_func!(lua_ctx, get_cs_hsv, "get_cs_hsv");
 
-        let lua_fun = lua_ctx.create_function_mut(set_lspeed).expect("Lua function creationg failed");
-        lua_ctx.globals().set("set_lspeed", lua_fun).expect("Function to var in lua failed");
-        let lua_fun = lua_ctx.create_function_mut(set_rspeed).expect("Lua function creationg failed");
-        lua_ctx.globals().set("set_rspeed", lua_fun).expect("Function to var in lua failed");
+        create_lua_func!(lua_ctx, set_pid, "set_pid");
+        create_lua_func!(lua_ctx, set_pidb, "set_pidb");
 
-        let lua_fun = lua_ctx.create_function_mut(set_lift).expect("Lua function creationg failed");
-        lua_ctx.globals().set("set_lift", lua_fun).expect("Function to var in lua failed");
-        let lua_fun = lua_ctx.create_function_mut(set_rotate).expect("Lua function creationg failed");
-        lua_ctx.globals().set("set_rotate", lua_fun).expect("Function to var in lua failed");
+        create_lua_func!(lua_ctx, set_lspeed, "set_lspeed");
+        create_lua_func!(lua_ctx, set_rspeed, "set_rspeed");
+        create_lua_func!(lua_ctx, set_mspeed, "set_mspeed");
 
-        let lua_fun = lua_ctx.create_function_mut(joystick_write).expect("Lua function creationg failed");
-        lua_ctx.globals().set("joystick_write", lua_fun).expect("Function to var in lua failed");
+        create_lua_func!(lua_ctx, lua_sleep, "sleep");
+
+        create_lua_func!(lua_ctx, set_lift, "set_lift");
+        create_lua_func!(lua_ctx, set_rotate, "set_rotate");
+
+        create_lua_func!(lua_ctx, joystick_write, "joystick_write");
+        create_lua_func!(lua_ctx, joystick_line, "joystick_line");
 
         // Setuping global vars
         lua_ctx.globals().set("CUR_ANG", 0);
@@ -446,5 +505,92 @@ fn joystick_write(_c: Context, _:()) -> Result<()>{
         //println!("printing");
         thread::sleep(time::Duration::from_millis(100));
     }
+    Ok(())
+}
+
+
+fn joystick_line(_c: Context, _:()) -> Result<()>{
+    let speed = 20;
+    let degrees = 20;
+    let mut port = Port::new();
+
+    let state = Arc::new(Mutex::new(joystick::GamePadState::new()));
+    let state_c = state.clone();
+
+    loop { if let Some(_) = port.poll() { break; } }
+    thread::spawn(move ||{
+        loop {
+            port.poll();
+            {state_c.lock().unwrap().consume_device(port.get(0).unwrap())}
+        }
+    });
+
+    let mut robot = line::RobotMoveBase::new();
+    let mut cur_mode = "s".to_string();
+    let mut kspeed = 0;
+    let mut kp = 0.0;
+    let mut kd = 0.0;
+    let mut running = true;
+    let mut pid = line::PID::new(kp, 0.0, kd);
+
+    fn error_fun(l: i32, r: i32) -> i32{
+        (((l - r) as f32)) as i32
+    }
+
+    loop {
+        let mut val;
+        { val = *state.lock().unwrap(); }
+        if val.up_dpad {
+            if cur_mode == "s" {
+                kspeed += 1;
+            } else if cur_mode == "p" {
+                kp += 0.1;
+            } else if cur_mode == "d" {
+                kd += 0.1;
+            }
+            pid.kp = kp;
+            pid.kd = kd;
+            thread::sleep(time::Duration::from_millis(100));
+        } else if val.down_dpad {
+            if cur_mode == "s" {
+                kspeed -= 1;
+            } else if cur_mode == "p" {
+                kp -= 0.1;
+            } else if cur_mode == "d" {
+                kd -= 0.1;
+            }
+            pid.kp = kp;
+            pid.kd = kd;
+            thread::sleep(time::Duration::from_millis(100));
+        } else if val.triangle {
+            cur_mode = "s".to_string();
+            thread::sleep(time::Duration::from_millis(100));
+        } else if val.square {
+            cur_mode = "p".to_string();
+            thread::sleep(time::Duration::from_millis(100));
+        } else if val.circle {
+            cur_mode = "d".to_string();
+            thread::sleep(time::Duration::from_millis(100));
+        } else if val.cross {
+            running = !running;
+            thread::sleep(time::Duration::from_millis(100));
+        } else if val.option {
+            println!("{}, {}, {}", kp, kd, kspeed);
+            thread::sleep(time::Duration::from_millis(400));
+        }
+
+        if running {
+            let (ls, rs) = robot.sensor_pair.get_reflected_color();
+            let error = error_fun(ls, rs);
+            let diff = pid.step(error);
+            robot.motor_pair.set_steering(diff, kspeed);
+        } else {
+            robot.motor_pair.set_steering(0,0);
+        }
+
+        // Global loop sleep
+        thread::sleep(time::Duration::from_millis(10));
+    }
+
     Ok(())
 }

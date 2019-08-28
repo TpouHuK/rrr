@@ -39,9 +39,9 @@ pub struct ControlSensor {
 }
 
 pub struct PID {
-    kp: f32,
-    ki: f32,
-    kd: f32,
+    pub kp: f32,
+    pub ki: f32,
+    pub kd: f32,
     last_error: f32,
     int: f32,
 }
@@ -92,7 +92,7 @@ impl Rotate {
 
     pub fn set_point(&mut self, point:i32) {
         self.motor.set_position_sp(point as isize).unwrap();
-        self.motor.set_speed_sp(750).unwrap();
+        self.motor.set_speed_sp(250).unwrap();
         self.motor.run_to_abs_pos(None).unwrap();
         while self.motor.is_running().unwrap() {
             thread::sleep(time::Duration::from_millis(10));
@@ -176,8 +176,8 @@ impl MotorPair {
             //Some(motor) => motor,
             //None => panic!("Right motor not found"), 
         //};
-        //lmotor.set_stop_action(tacho_motor::STOP_ACTION_HOLD.to_string()).unwrap();
-        //rmotor.set_stop_action(tacho_motor::STOP_ACTION_HOLD.to_string()).unwrap();
+        lmotor.set_stop_action(tacho_motor::STOP_ACTION_HOLD.to_string()).unwrap();
+        rmotor.set_stop_action(tacho_motor::STOP_ACTION_HOLD.to_string()).unwrap();
         
         //let mut ls: i32 = 0;
         //let mut rs: i32 = 0;
@@ -300,7 +300,7 @@ impl SensorPair {
         }
     }
 
-    fn get_reflected_color(&mut self) -> (i32, i32) {
+    pub fn get_reflected_color(&mut self) -> (i32, i32) {
         (self.lsensor.get_value0().unwrap() as i32,
         self.rsensor.get_value0().unwrap() as i32)
     }
@@ -464,7 +464,7 @@ pub fn ride_line_cross(
     }
     #[inline]
     fn both_err(l: i32, r: i32) -> i32{
-        (((l - r) as f32) * 0.3) as i32
+        (((l - r) as f32)) as i32
     }
 
     //ride_line(pid_k, speed, robot, &both_err, &stop_cross_white);
@@ -516,7 +516,7 @@ pub fn ride_line_left_stop(
     fn ride_right(l: i32, r: i32) -> i32{
         middle_grey() - r
     }
-    //ride_line(pid_k, speed, robot, &ride_right, &stop_left_white);
+    ride_line(pid_k, speed, robot, &ride_right, &stop_left_white);
     ride_line(pid_k, speed, robot, &ride_right, &stop_left);
     //ride_line(pid_k, speed, robot, &ride_right, &stop_left_white);
 }
@@ -536,7 +536,7 @@ pub fn ride_line_right_stop(
     fn ride_left(l: i32, r: i32) -> i32{
         l - middle_grey()
     }
-    //ride_line(pid_k, speed, robot, &ride_left, &stop_right_white);
+    ride_line(pid_k, speed, robot, &ride_left, &stop_right_white);
     ride_line(pid_k, speed, robot, &ride_left, &stop_right);
     //ride_line(pid_k, speed, robot, &ride_left, &stop_right_white);
 }
