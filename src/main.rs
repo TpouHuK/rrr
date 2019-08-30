@@ -55,11 +55,11 @@ enum TypeOfMove {
     Macro(Vec<i32>),
     UnMacro(Vec<i32>),
     LineDegrees((i32)),
-    Degrees((i32)),
+    Degrees(i32, i32),
     RightOutLine,
 }
 
-fn mainr() {
+fn main() {
     println!("Launched");
     let is_goto_running = Arc::new((Mutex::new(false), Condvar::new()));
     let is_goto_running_c = is_goto_running.clone();
@@ -180,7 +180,7 @@ fn mainr() {
                     line::ride_outer_line_left_stop(pid, lspeed, &mut robot);
                     robot.motor_pair.set_steering(0, 0);
                 },
-                TypeOfMove::Degrees(degrees) => {
+                TypeOfMove::Degrees(steering, degrees) => {
                     let mut mspeed;
                     {mspeed = *kmspeed.lock().unwrap()};
                     robot.motor_pair.go_on_degrees(mspeed, degrees);
@@ -391,13 +391,13 @@ fn mainr() {
             Ok(())
         };
 
-        let ride_degrees = move |_c: Context, degrees: i32| {
+        let ride_degrees = move |_c: Context, (steering, degrees): (i32, i32)| {
             let (mutex, condvar) = &*is_goto_running_c8;
             {
                 let mut running = mutex.lock().unwrap();
                 *running = true;
             }
-            send_ch7.send(TypeOfMove::Degrees(degrees)).unwrap();
+            send_ch7.send(TypeOfMove::Degrees(steering, degrees)).unwrap();
             Ok(())
         };
 
@@ -593,8 +593,6 @@ fn joystick_line(_c: Context, _:()) -> Result<()>{
     Ok(())
 }
 
-fn main() {
-    let mut robot = line::RobotMoveBase::new();
-    robot.motor_pair.set_pid_steering(0, 30);
-    thread::sleep(time::Duration::from_secs(1000));
+fn write_joystick() {
+
 }

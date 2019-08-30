@@ -9,7 +9,7 @@ function rotate_to_point(point)
 end
 
 function line_degrees(degrees)
-	r_ride_line_degrees()
+	r_ride_line_degrees(degrees)
 	r_wait_till_arrival()
 end
 
@@ -21,7 +21,7 @@ function ride_degrees(degrees, speed)
 	speed = speed or D_ride_degrees_speed
 	r_set_mspeed(speed)
 
-	r_ride_degrees(degrees)
+	r_ride_degrees(0, degrees)
 	r_wait_till_arrival()
 	set_defaults()
 end

@@ -322,7 +322,7 @@ impl MotorPair {
         let cl = self.lmotor.get_position().unwrap() as i32;
         let cr = self.rmotor.get_position().unwrap() as i32;
 
-        self.set_steering(0, speed);
+        self.set_pid_steering(0, speed);
 
         while 
         (((self.lmotor.get_position().unwrap() as i32) - cl).abs() < degrees)
@@ -336,7 +336,7 @@ impl MotorPair {
         let cl = self.lmotor.get_position().unwrap() as i32;
         let cr = self.rmotor.get_position().unwrap() as i32;
 
-        self.set_steering(steering, speed);
+        self.set_pid_steering(steering, speed);
 
         while 
         (((self.lmotor.get_position().unwrap() as i32) - cl).abs() < degrees)
