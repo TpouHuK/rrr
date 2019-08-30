@@ -26,7 +26,7 @@ pub struct RobotMoveBase {
 pub struct MotorPair {
     lmotor: MediumMotor,
     rmotor: MediumMotor,
-    send_ch: mpsc::Sender<(i32, i32)>,
+    send_ch: mpsc::Sender<(i32, i32, bool)>,
 }
 
 pub struct SensorPair {
@@ -176,7 +176,26 @@ impl ControlSensor {
 
 impl MotorPair {
     pub fn new() -> Self {
-        let (tx, rx) = mpsc::channel();
+        // Old init
+         let mut lmotor = match MediumMotor::new(MotorPort::OutB) {
+            Some(motor) => motor,
+            None => panic!("Left motor not found"), 
+        };
+
+        let mut rmotor = match MediumMotor::new(MotorPort::OutC) {
+            Some(motor) => motor,
+            None => panic!("Right motor not found"), 
+        }; 
+
+        //New init
+        let (tx, rx) = mpsc::channel::<(i32, i32, bool)>();
+
+    thread::spawn(move || {
+        #[inline]
+        fn limit(a: i32) -> i32 {
+            return if a > 100 { 100 } else if a < -100 { -100 } else { a }
+        }
+
         let mut lmotor = match MediumMotor::new(MotorPort::OutB) {
             Some(motor) => motor,
             None => panic!("Left motor not found"), 
@@ -186,54 +205,64 @@ impl MotorPair {
             Some(motor) => motor,
             None => panic!("Right motor not found"), 
         };
-
-    //thread::spawn(move || {
-        //let mut lmotor = match MediumMotor::new(MotorPort::OutB) {
-            //Some(motor) => motor,
-            //None => panic!("Left motor not found"), 
-        //};
-
-        //let mut rmotor = match MediumMotor::new(MotorPort::OutC) {
-            //Some(motor) => motor,
-            //None => panic!("Right motor not found"), 
-        //};
         lmotor.set_stop_action(tacho_motor::STOP_ACTION_HOLD.to_string()).unwrap();
         rmotor.set_stop_action(tacho_motor::STOP_ACTION_HOLD.to_string()).unwrap();
         
-        //let mut ls: i32 = 0;
-        //let mut rs: i32 = 0;
+        let mut ls: i32 = 0;
+        let mut rs: i32 = 0;
 
-        //let mut cls: i32 = 0;
-        //let mut crs: i32 = 0;
+        let mut cls: i32 = 0;
+        let mut crs: i32 = 0;
 
-        //loop {
-            //match rx.try_recv() {
-                //Ok(val) => {
-                    //ls = val.0;
-                    //rs = val.1;
-                    //cls = lmotor.get_position().unwrap() as i32;
-                    //crs = rmotor.get_position().unwrap() as i32;
-                //},
-                //Err(e) => match e {}, 
-            //}
+        let mut is_adjusting = false;
+        let mut val = (0, 0, false);
+        let mut pid = PID::new(0.01, 0.0, 0.01);
+        loop {
+            if is_adjusting {
+                match rx.try_recv() {
+                    Ok(val) => {
+                        ls = val.0;
+                        rs = val.1;
+                        is_adjusting = val.2; 
+                        cls = lmotor.get_position().unwrap() as i32;
+                        crs = rmotor.get_position().unwrap() as i32;
+                    },
+                    Err(e) => match e {
+                        mpsc::TryRecvError::Disconnected => { break; },
+                        mpsc::TryRecvError::Empty => {},
+                    }, 
+                }
+            } else {
+                match rx.recv() {
+                    Ok(val) => {
+                        ls = val.0;
+                        rs = val.1;
+                        is_adjusting = val.2;
+                        cls = lmotor.get_position().unwrap() as i32;
+                        crs = rmotor.get_position().unwrap() as i32;
+                    },
+                    Err(_) => { break; }
+                }
+            }
 
-            //let lc = (cls - lmotor.get_position().unwrap() as i32);
-            //let rc = (crs - rmotor.get_position().unwrap() as i32);
+            let lc = -(cls - lmotor.get_position().unwrap() as i32);
+            let rc = (crs - rmotor.get_position().unwrap() as i32);
 
-            //let diff = lc - rc;
-            //// + if L is more
-            //// - if R is more
-            //if diff > 0 {
-                //lmotor.set_speed_sp((-(lc - diff)) as isize).unwrap();
-                //rmotor.set_speed_sp(rc as isize).unwrap();
-            //} else {
-                //lmotor.set_speed_sp((-(lc)) as isize).unwrap();
-                //rmotor.set_speed_sp((rc - diff) as isize).unwrap();
-            //}
+            let diff = dbg!(pid.step(lc*rs - rc*ls));
+
+            let lse = limit(ls + rs.signum()*diff)*15;
+            let rse = limit(rs - ls.signum()*diff)*15;
+
+            lmotor.set_speed_sp((-dbg!(lse)) as isize).unwrap();
+            rmotor.set_speed_sp(dbg!(rse) as isize).unwrap();
+
+            lmotor.run_forever().unwrap();
+            rmotor.run_forever().unwrap();
              
-            //thread::sleep(time::Duration::from_millis(10))
-        //}
-    //});
+            thread::sleep(time::Duration::from_millis(50))
+        }
+    }); // end of thread
+
         return MotorPair {
             lmotor: lmotor,
             rmotor: rmotor,
@@ -241,7 +270,7 @@ impl MotorPair {
         }
     }
 
-    pub fn set_speed(&mut self, lm: i32, rm: i32) {
+    fn set_speed(&mut self, lm: i32, rm: i32) {
         fn limit(a: i32) -> i32 {
             return if a > 100 { 100 } else if a < -100 { -100 } else { a }
         }
@@ -272,7 +301,21 @@ impl MotorPair {
             rmot = speed;
         }
         
-        self.set_speed(lmot, rmot);
+        //self.set_speed(lmot, rmot);
+        self.send_ch.send((lmot, rmot, false));
+    }
+    
+    pub fn set_pid_steering(&mut self, steering: i32, speed: i32) {
+        let mut lmot;
+        let mut rmot;
+        if steering > 0 {
+            lmot = speed;
+            rmot = speed - steering * speed / 50 ;
+        } else {
+            lmot = speed + steering * speed / 50 ;
+            rmot = speed;
+        }
+        self.send_ch.send((lmot, rmot, true));
     }
 
     pub fn go_on_degrees(&mut self, speed: i32, degrees: i32) {

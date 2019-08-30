@@ -59,7 +59,7 @@ enum TypeOfMove {
     RightOutLine,
 }
 
-fn main() {
+fn mainr() {
     println!("Launched");
     let is_goto_running = Arc::new((Mutex::new(false), Condvar::new()));
     let is_goto_running_c = is_goto_running.clone();
@@ -591,4 +591,10 @@ fn joystick_line(_c: Context, _:()) -> Result<()>{
     }
 
     Ok(())
+}
+
+fn main() {
+    let mut robot = line::RobotMoveBase::new();
+    robot.motor_pair.set_pid_steering(0, 30);
+    thread::sleep(time::Duration::from_secs(1000));
 }
