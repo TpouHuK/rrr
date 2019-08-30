@@ -17,14 +17,13 @@ const DEFAULT_KP: f32 = 1.0;
 const DEFAULT_KI: f32 = 0.0;
 const DEFAULT_KD: f32 = 0.0;
 
+const MACRO_SPEED: i32 = 20;
+
 const LINE_DEGREES: i32 = 80;
 
 const DEFAULT_FILENAME: &str = "script.lua";
 const ENV_FILENAME_VAR: &str = "LUA_FILENAME";
 
-
-const MACRO_DEGREES: i32 = 20;
-const MACRO_SPEED: i32 = 20;
 
 fn get_script() -> String {
     let script_name = match env::var(ENV_FILENAME_VAR) {
@@ -52,8 +51,6 @@ fn minf32(a: f32, b: f32) -> f32 {
 
 enum TypeOfMove {
     GotoPoint(Vec<graph::MoveAction>),
-    Macro(Vec<i32>),
-    UnMacro(Vec<i32>),
     LineDegrees((i32)),
     Degrees(i32, i32),
     RightOutLine,
@@ -148,22 +145,6 @@ fn main() {
             }
             robot.motor_pair.set_steering(0, 0);
             },
-                TypeOfMove::Macro(steerings) => {
-                    let mut mspeed;
-                    {mspeed = *kmspeed.lock().unwrap()};
-                    for steering in steerings.iter() {
-                        robot.motor_pair.steer_on_degrees(*steering, mspeed, MACRO_DEGREES);
-                    }
-                    robot.motor_pair.set_steering(0, 0);
-                },
-                TypeOfMove::UnMacro(steerings) => {
-                    let mut mspeed;
-                    {mspeed = *kmspeed.lock().unwrap()};
-                    for steering in steerings.iter() {
-                        robot.motor_pair.steer_on_degrees(*steering, -mspeed, MACRO_DEGREES);
-                    }
-                    robot.motor_pair.set_steering(0, 0);
-                },
                 TypeOfMove::LineDegrees(degrees) => {
                     let mut pidb;
                     let mut lspeed;
@@ -333,28 +314,6 @@ fn main() {
             Ok(())
         };
 
-        let run_macro = move |_c: Context, mac: String| {
-            let mac = mac.split(",").map(|x| {x.parse::<i32>().unwrap()}).collect::<Vec<i32>>();
-            let (mutex, condvar) = &*is_goto_running_c3;
-            {
-                let mut running = mutex.lock().unwrap();
-                *running = true;
-            }
-            send_ch2.send(TypeOfMove::Macro(mac)).unwrap();
-            Ok(())
-        };
-
-        let run_unmacro = move |_c: Context, mac: String| {
-            let mac = mac.split(",").map(|x| {x.parse::<i32>().unwrap()}).collect::<Vec<i32>>();
-            let (mutex, condvar) = &*is_goto_running_c5;
-            {
-                let mut running = mutex.lock().unwrap();
-                *running = true;
-            }
-            send_ch4.send(TypeOfMove::UnMacro(mac)).unwrap();
-            Ok(())
-        };
-
         let get_cs_hsv = move |_c: Context, _:()|{
             let (r, g, b) = cs.get_rgb();
             let (h, s, v) = line::ControlSensor::rgb2hsv(r, g, b);
@@ -420,8 +379,6 @@ fn main() {
 
         create_lua_func!(lua_ctx, goto_point, "r_goto_point");
         create_lua_func!(lua_ctx, rotate_to_point, "r_rotate_to_point");
-        create_lua_func!(lua_ctx, run_macro, "r_macro");
-        create_lua_func!(lua_ctx, run_unmacro, "r_unmacro");
         create_lua_func!(lua_ctx, ride_line_degrees, "r_ride_line_degrees");
         create_lua_func!(lua_ctx, ride_outer_line_left_stop, "r_rolls");
         create_lua_func!(lua_ctx, ride_degrees, "r_ride_degrees");
