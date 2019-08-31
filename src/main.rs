@@ -164,7 +164,7 @@ fn main() {
                 TypeOfMove::Degrees(steering, degrees) => {
                     let mut mspeed;
                     {mspeed = *kmspeed.lock().unwrap()};
-                    robot.motor_pair.go_on_degrees(mspeed, degrees);
+                    robot.motor_pair.steer_on_degrees(steering, mspeed, degrees);
                     robot.motor_pair.set_steering(0, 0);
                 },
             }
