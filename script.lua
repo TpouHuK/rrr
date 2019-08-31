@@ -131,7 +131,7 @@ function get_router(cub_n)
 	set_rotate(0)
 	ride_degrees(100, -10)
 	set_lift("take_router")
-	line_degrees(100)
+	ride_degrees(100)
 	set_lift("up")
 end
 
@@ -139,6 +139,12 @@ function pr_long(color)
 end
 
 function pr_short(color)
+end
+
+function shake()
+	ride_degrees_steer(-100, 20)
+	ride_degrees_steer(-100, 40, -20)
+	ride_degrees_steer(-100, 20)
 end
 
 function put_router(color, side)
@@ -155,7 +161,7 @@ function put_router(color, side)
 		elseif color == "green"  then gt = "10"; rt = "18"; rp = 2;
 		end
 	end
-	tp = 0
+	tp = get_color_rotation(color)
 	where = (tp - rp)
 	if where < 0 then
 		where = where + 4
@@ -169,9 +175,55 @@ function put_router(color, side)
 	if side == "long" then
 		-- longride
 	elseif side == "short" then
-		line_degrees(110)
-		set_lift("put_router")
-		ride_degrees(110, -20)
+		if where == 0 then
+			set_rotate(0)
+			ride_degrees(100) -- forward
+
+			set_lift("shake_router")
+			shake()
+			set_lift("put_router")
+
+			ride_degrees(100, -20) -- return
+			set_lift("up")
+
+		elseif where == 1 then
+			set_rotate(1)
+			ride_degrees(120) -- forward
+			ride_degrees_steer(20, -80)
+
+			set_lift("shake_router")
+			shake()
+			set_lift("put_router")
+
+			ride_degrees_steer(20, -80, -20) -- return
+			ride_degrees(120, -20) 
+			set_lift("up")
+
+		elseif where == 3 then
+			set_rotate(3)
+			ride_degrees(120) -- forward
+			ride_degrees_steer(20, 80)
+
+			set_lift("shake_router")
+			shake()
+			set_lift("put_router")
+
+			ride_degrees_steer(20, 80, -20) -- return
+			ride_degrees(120, -20) 
+			set_lift("up")
+
+		elseif where == 2 then
+			set_rotate(2) 
+			ride_degrees(150) -- forward
+
+			set_lift("shake_router")
+			shake()
+			set_lift("put_router")
+
+			set_rotate(0)
+			set_lift("up")
+			ride_degrees(150, -20) -- return
+		end
 	end
 
 end
@@ -199,10 +251,15 @@ function main()
 end
 
 main()
-ride_degrees(390)
 ride_degrees_steer(-100, 110)
 ride_degrees(90)
 ride_degrees_steer(100, 110)
 start_line_ride()
-get_router(6)
+get_router(1)
 put_router("red", "short")
+get_router(2)
+put_router("blue", "short")
+get_router(3)
+put_router("yellow", "short")
+get_router(4)
+put_router("green", "short")
