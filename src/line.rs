@@ -486,9 +486,9 @@ pub fn ride_line_degrees(
         let error = error_fun(ls, rs);
         let diff = pid.step(error);
         robot.motor_pair.set_steering(diff, speed);
-        if ((robot.motor_pair.lmotor.get_position().unwrap()-sl).abs()+
-            (robot.motor_pair.rmotor.get_position().unwrap()-sr).abs())/2 > degrees {
-            break
+        if (((self.lmotor.get_position().unwrap() as i32) - cl).abs() > degrees)
+        || (((self.rmotor.get_position().unwrap() as i32) - cr).abs() > degrees) {
+            break;
         }
     }
 }
