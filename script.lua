@@ -142,9 +142,9 @@ function pr_short(color)
 end
 
 function shake()
-	ride_degrees_steer(-100, 20)
-	ride_degrees_steer(-100, 40, -20)
-	ride_degrees_steer(-100, 20)
+	ride_degrees_steer(-100, 10, 10)
+	ride_degrees_steer(-100, 20, -10)
+	ride_degrees_steer(-100, 10, 10)
 end
 
 function put_router(color, side)
@@ -195,6 +195,7 @@ function put_router(color, side)
 			shake()
 			set_lift("put_router")
 
+			set_rotate(0)
 			ride_degrees_steer(20, -80, -20) -- return
 			ride_degrees(120, -20) 
 			set_lift("up")
@@ -208,6 +209,7 @@ function put_router(color, side)
 			shake()
 			set_lift("put_router")
 
+			set_rotate(0)
 			ride_degrees_steer(20, 80, -20) -- return
 			ride_degrees(120, -20) 
 			set_lift("up")
@@ -251,6 +253,7 @@ function main()
 end
 
 main()
+ride_degrees(320)
 ride_degrees_steer(-100, 110)
 ride_degrees(90)
 ride_degrees_steer(100, 110)
