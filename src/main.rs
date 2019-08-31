@@ -19,7 +19,7 @@ const DEFAULT_KD: f32 = 0.0;
 
 const MACRO_SPEED: i32 = 20;
 
-const LINE_DEGREES: i32 = 80;
+const LINE_DEGREES: i32 = 60;
 
 const DEFAULT_FILENAME: &str = "script.lua";
 const ENV_FILENAME_VAR: &str = "LUA_FILENAME";
@@ -294,6 +294,7 @@ fn main() {
                 cur_point,
                 finish_point.to_owned(),
                 cur_ang);
+            if path.len() == 0 { return Ok(()) }
             let path = (&path[..1]).to_vec();
             if let graph::MoveAction::Rotate(_) = path[0] {
                 {}
