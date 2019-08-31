@@ -96,7 +96,12 @@ fn main() {
 
     let mut krspeed = Arc::new(Mutex::new(DEFAULT_SPEED));
     let mut krspeed_c = krspeed.clone();
+
+    let mut kldegrees = Arc::new(Mutex::new(LINE_DEGREES));
+    let mut kldegrees_c = kldegrees.clone();
+
     let mut cs = line::ControlSensor::new();
+
 
     println!("Stuff inited");
     let goto_point_thread = thread::spawn(move|| {
@@ -115,9 +120,11 @@ fn main() {
             let mut pid;
             let mut lspeed;
             let mut rspeed;
+            let mut ldegrees;
             {pidb = *kpidb.lock().unwrap()};
             {pid = *kpid.lock().unwrap()};
             {lspeed = *klspeed.lock().unwrap()};
+            {ldegrees = *kldegrees.lock().unwrap()};
             {rspeed = *krspeed.lock().unwrap()};
 
             for elem in path {
@@ -134,7 +141,7 @@ fn main() {
                                 line::ride_line_right_stop(pid, lspeed, &mut robot);
                             },
                         }
-                        robot.motor_pair.go_on_degrees(lspeed, LINE_DEGREES);
+                        robot.motor_pair.go_on_degrees(lspeed, ldegrees);
                     },
                     graph::MoveAction::Rotate(count) => {
                         robot.motor_pair.set_steering(0, 0);
@@ -196,6 +203,12 @@ fn main() {
             let mutex = &*klspeed_c;
             let mut speed = mutex.lock().unwrap();
             *speed = ispeed;
+            Ok(())
+        };
+        let set_ldegrees = move |_c, idegrees: i32|{
+            let mutex = &*kldegrees_c;
+            let mut degrees = mutex.lock().unwrap();
+            *degrees = idegrees;
             Ok(())
         };
         let lua_sleep = |_c, secs: u64|{
@@ -375,6 +388,7 @@ fn main() {
         create_lua_func!(lua_ctx, set_pid, "r_set_pid");
         create_lua_func!(lua_ctx, set_pidb, "r_set_pidb");
         create_lua_func!(lua_ctx, set_lspeed, "r_set_lspeed");
+        create_lua_func!(lua_ctx, set_ldegrees, "r_set_ldegrees");
         create_lua_func!(lua_ctx, set_rspeed, "r_set_rspeed");
         create_lua_func!(lua_ctx, set_mspeed, "r_set_mspeed");
 
