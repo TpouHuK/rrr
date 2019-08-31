@@ -425,8 +425,8 @@ use stick::Port;
 use stick;
 
 fn joystick_write(_c: Context, _:()) -> Result<()>{
-    let speed = 20;
-    let degrees = 20;
+    use ev3dev_lang_rust::tacho_motor::TachoMotor;
+    let speed = 10;
     let mut port = Port::new();
 
     let state = Arc::new(Mutex::new(joystick::GamePadState::new()));
@@ -441,39 +441,50 @@ fn joystick_write(_c: Context, _:()) -> Result<()>{
     });
 
     let mut robot = line::RobotMoveBase::new();
-    let mut cur_data = Vec::<i32>::new();
+    let mut steering = 0;
+    let mut mstate = 0;
+
+    let mut lc = robot.motor_pair.lmotor.get_position().unwrap() as i32;
+    let mut rc = robot.motor_pair.rmotor.get_position().unwrap() as i32;
+
+    let mut val;
     loop {
-        let mut val;
         { val = *state.lock().unwrap(); }
         if val.rt_b {
-            let steering = val.lx*100/128;
-            cur_data.push(steering);
-            robot.motor_pair.steer_on_degrees(steering, speed, degrees);
-            robot.motor_pair.set_steering(0, 0);
+            if mstate != 1{
+                robot.motor_pair.set_pid_steering(steering, speed);
+                mstate = 1;
+            }
         } else if val.lt_b {
-            let steering = cur_data.pop().expect("Nothing to undo");
-            robot.motor_pair.steer_on_degrees(steering, -speed, degrees);
-            robot.motor_pair.set_steering(0, 0);
+            if mstate != -1{
+                robot.motor_pair.set_pid_steering(steering, -speed);
+                mstate = -1;
+            }
+            
         } else if val.cross {
-            for steering in cur_data.iter().rev() {
-                robot.motor_pair.steer_on_degrees(*steering, -speed, degrees);
-            }
-            robot.motor_pair.set_steering(0, 0);
+            steering = val.lx*100/128;
         } else if val.circle {
-            for steering in cur_data.iter() {
-                robot.motor_pair.steer_on_degrees(*steering, speed, degrees);
-            }
-            robot.motor_pair.set_steering(0, 0);
+            lc = robot.motor_pair.lmotor.get_position().unwrap() as i32;
+            rc = robot.motor_pair.rmotor.get_position().unwrap() as i32;
         } else if val.triangle {
-            cur_data.clear();
         } else if val.square {
-            println!("{}", cur_data.iter().map(|x| {x.to_string()})
-                     .collect::<Vec<String>>().join(","));
-            thread::sleep(time::Duration::from_millis(400));
+            if mstate != 0 {
+                continue
+            }
+            let tlc = robot.motor_pair.lmotor.get_position().unwrap() as i32;
+            let trc = robot.motor_pair.rmotor.get_position().unwrap() as i32;
+
+            eprintln!("L:{}, R:{}, STR:{}", -(tlc - lc), trc - rc, steering);
+            println!("L:{}, R:{}, STR:{}", -(tlc - lc), trc - rc, steering);
+        } else {
+            if mstate != 0 {
+                robot.motor_pair.set_steering(0, 0);
+                mstate = 0;
+            }
         }
         //println!("{:?}", val);
         //println!("printing");
-        thread::sleep(time::Duration::from_millis(100));
+        thread::sleep(time::Duration::from_millis(10));
     }
     Ok(())
 }
@@ -563,8 +574,4 @@ fn joystick_line(_c: Context, _:()) -> Result<()>{
     }
 
     Ok(())
-}
-
-fn write_joystick() {
-
 }
