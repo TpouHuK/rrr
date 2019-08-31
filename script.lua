@@ -177,7 +177,7 @@ function put_router(color, side)
 	elseif side == "short" then
 		if where == 0 then
 			set_rotate(0)
-			ride_degrees(100) -- forward
+			line_degrees(100) -- forward
 
 			set_lift("shake_router")
 			shake()
@@ -188,7 +188,7 @@ function put_router(color, side)
 
 		elseif where == 1 then
 			set_rotate(1)
-			ride_degrees(120) -- forward
+			line_degrees(120) -- forward
 			ride_degrees_steer(20, -80)
 
 			set_lift("shake_router")
@@ -202,7 +202,7 @@ function put_router(color, side)
 
 		elseif where == 3 then
 			set_rotate(3)
-			ride_degrees(120) -- forward
+			line_degrees(120) -- forward
 			ride_degrees_steer(20, 80)
 
 			set_lift("shake_router")
@@ -216,7 +216,7 @@ function put_router(color, side)
 
 		elseif where == 2 then
 			set_rotate(2) 
-			ride_degrees(150) -- forward
+			line_degrees(150) -- forward
 
 			set_lift("shake_router")
 			shake()
@@ -235,6 +235,8 @@ function set_defaults()
 	r_set_pidb(0.5, 0, 0.8)
 
 	r_set_lspeed(20)
+	r_set_ldegrees(70)
+
 	r_set_rspeed(10)
 	r_set_mspeed(20)
 
