@@ -24,9 +24,9 @@ pub struct RobotMoveBase {
 }
 
 pub struct MotorPair {
-    lmotor: MediumMotor,
-    rmotor: MediumMotor,
-    send_ch: mpsc::Sender<(i32, i32, bool)>,
+    pub lmotor: MediumMotor,
+    pub rmotor: MediumMotor,
+    send_ch: mpsc::SyncSender<(i32, i32, bool)>,
 }
 
 pub struct SensorPair {
@@ -188,7 +188,7 @@ impl MotorPair {
         }; 
 
         //New init
-        let (tx, rx) = mpsc::channel::<(i32, i32, bool)>();
+        let (tx, rx) = mpsc::sync_channel::<(i32, i32, bool)>(1);
 
     thread::spawn(move || {
         #[inline]
@@ -248,16 +248,18 @@ impl MotorPair {
             let lc = -(cls - lmotor.get_position().unwrap() as i32);
             let rc = (crs - rmotor.get_position().unwrap() as i32);
 
-            let diff = dbg!(pid.step(lc*rs - rc*ls));
+            let diff = pid.step(lc*rs - rc*ls);
 
             let lse = limit(ls + rs.signum()*diff)*15;
             let rse = limit(rs - ls.signum()*diff)*15;
 
-            lmotor.set_speed_sp((-dbg!(lse)) as isize).unwrap();
-            rmotor.set_speed_sp(dbg!(rse) as isize).unwrap();
+            lmotor.set_speed_sp((-lse) as isize).unwrap();
+            rmotor.set_speed_sp(rse as isize).unwrap();
 
-            lmotor.run_forever().unwrap();
-            rmotor.run_forever().unwrap();
+            if lse == 0 { lmotor.stop().unwrap();}
+            else { lmotor.run_forever().unwrap();}
+            if rse == 0 { rmotor.stop().unwrap();}
+            else { rmotor.run_forever().unwrap();}
              
             thread::sleep(time::Duration::from_millis(50))
         }

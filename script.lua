@@ -26,10 +26,50 @@ function ride_degrees(degrees, speed)
 	set_defaults()
 end
 
+function ride_degrees_steer(steer, degrees, speed)
+	speed = speed or D_ride_degrees_speed
+	r_set_mspeed(speed)
+
+	r_ride_degrees(steer, degrees)
+	r_wait_till_arrival()
+	set_defaults()
+end
+
 function start_line_ride()
 	r_rolls()
 	read_markers()
 	r_wait_till_arrival()
+	ride_degrees(60)
+end
+
+function has_value (tab, val)
+	for index, value in ipairs(tab) do
+		if value == val then
+			return true
+		end
+	end
+
+	return false
+end
+
+function get_color()
+	h, s, v = r_get_cs_hsv()
+	if (s < 50) or (v < 30) then
+		return "none"
+	end
+	if (h < 30) or (h > 330)then
+		return "red"
+	end
+	if (h < 90) then
+		return "yellow"
+	end
+	if (h < 150) then
+		return "green"
+	end
+	if (h < 270) then
+		return "blue"
+	end
+	return "none"
 end
 
 function read_markers()
@@ -88,11 +128,11 @@ function get_router(cub_n)
 	goto_point(gt)
 	rotate_to_point(rt)
 
+	set_rotate(0)
 	ride_degrees(100, -10)
 	set_lift("take_router")
-	line_degrees(120)
+	line_degrees(100)
 	set_lift("up")
-	ride_degrees(20, -10)
 end
 
 function pr_long(color)
@@ -115,6 +155,7 @@ function put_router(color, side)
 		elseif color == "green"  then gt = "10"; rt = "18"; rp = 2;
 		end
 	end
+	tp = 0
 	where = (tp - rp)
 	if where < 0 then
 		where = where + 4
@@ -122,22 +163,25 @@ function put_router(color, side)
 
 	goto_point(gt)
 	rotate_to_point(rt)
+	set_lift("up")
 	set_rotate(0)
 
 	if side == "long" then
 		-- longride
 	elseif side == "short" then
-		-- shortride
+		line_degrees(110)
+		set_lift("put_router")
+		ride_degrees(110, -20)
 	end
 
 end
 
 function set_defaults()
-	r_set_pid(1, 0, 2)
-	r_set_pidb(0.5, 0, 10)
+	r_set_pid(0.8, 0, 1)
+	r_set_pidb(0.5, 0, 0.8)
 
-	r_set_lspeed(80)
-	r_set_rspeed(30)
+	r_set_lspeed(20)
+	r_set_rspeed(10)
 	r_set_mspeed(20)
 
 	r_set_white(50)
@@ -155,10 +199,10 @@ function main()
 end
 
 main()
-goto_point("21")
-goto_point("27")
-goto_point("32")
-goto_point("11")
-goto_point("0")
-goto_point("4")
-goto_point("32")
+ride_degrees(390)
+ride_degrees_steer(-100, 110)
+ride_degrees(90)
+ride_degrees_steer(100, 110)
+start_line_ride()
+get_router(6)
+put_router("red", "short")
