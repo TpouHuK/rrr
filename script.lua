@@ -42,6 +42,13 @@ function start_line_ride()
 	ride_degrees(60)
 end
 
+function start_degrees_ride()
+	ride_degrees(320)
+	ride_degrees_steer(-100, 110)
+	ride_degrees(90)
+	ride_degrees_steer(100, 110)
+end
+
 function has_value (tab, val)
 	for index, value in ipairs(tab) do
 		if value == val then
@@ -254,18 +261,14 @@ function main()
 
 end
 
-r_joystick_write()
--- main()
--- ride_degrees(320)
--- ride_degrees_steer(-100, 110)
--- ride_degrees(90)
--- ride_degrees_steer(100, 110)
--- start_line_ride()
--- get_router(1)
--- put_router("red", "short")
--- get_router(2)
--- put_router("blue", "short")
--- get_router(3)
--- put_router("yellow", "short")
--- get_router(4)
--- put_router("green", "short")
+main()
+start_line_ride()
+start_degrees_ride()
+get_router(1)
+put_router("red", "short")
+get_router(2)
+put_router("blue", "short")
+get_router(3)
+put_router("yellow", "short")
+get_router(4)
+put_router("green", "short")
