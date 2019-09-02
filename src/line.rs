@@ -216,7 +216,7 @@ impl MotorPair {
 
         let mut is_adjusting = false;
         let mut val = (0, 0, false);
-        let mut pid = PID::new(0.01, 0.0, 0.01);
+        let mut pid = PID::new(0.03, 0.0, 0.01);
         loop {
             if is_adjusting {
                 match rx.try_recv() {
