@@ -473,9 +473,9 @@ fn joystick_write(_c: Context, _:()) -> Result<()>{
             }
             let tlc = robot.motor_pair.lmotor.get_position().unwrap() as i32;
             let trc = robot.motor_pair.rmotor.get_position().unwrap() as i32;
-
             eprintln!("L:{}, R:{}, STR:{}", -(tlc - lc), trc - rc, steering);
             println!("L:{}, R:{}, STR:{}", -(tlc - lc), trc - rc, steering);
+            thread::sleep(time::Duration::from_millis(1000));
         } else {
             if mstate != 0 {
                 robot.motor_pair.set_steering(0, 0);
