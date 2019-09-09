@@ -26,7 +26,8 @@ pub struct RobotMoveBase {
 pub struct MotorPair {
     pub lmotor: MediumMotor,
     pub rmotor: MediumMotor,
-    send_ch: mpsc::SyncSender<(i32, i32, bool)>,
+    send_ch: mpsc::SyncSender<(i32, i32, bool, bool)>,
+    //TODO add message type instead of bare tuple
 }
 
 pub struct SensorPair {
@@ -188,7 +189,7 @@ impl MotorPair {
         }; 
 
         //New init
-        let (tx, rx) = mpsc::sync_channel::<(i32, i32, bool)>(1);
+        let (tx, rx) = mpsc::sync_channel::<(i32, i32, bool, bool)>(1);
 
     thread::spawn(move || {
         #[inline]
@@ -218,14 +219,18 @@ impl MotorPair {
         let mut val = (0, 0, false);
         let mut pid = PID::new(0.03, 0.0, 0.01);
         loop {
+            // TODO remove code duplication
             if is_adjusting {
                 match rx.try_recv() {
                     Ok(val) => {
                         ls = val.0;
                         rs = val.1;
                         is_adjusting = val.2; 
-                        cls = lmotor.get_position().unwrap() as i32;
-                        crs = rmotor.get_position().unwrap() as i32;
+                        let is_reset_degrees = val.3;
+                        if is_reset_degrees {
+                            cls = lmotor.get_position().unwrap() as i32;
+                            crs = rmotor.get_position().unwrap() as i32;
+                        }
                     },
                     Err(e) => match e {
                         mpsc::TryRecvError::Disconnected => { break; },
@@ -238,8 +243,11 @@ impl MotorPair {
                         ls = val.0;
                         rs = val.1;
                         is_adjusting = val.2;
-                        cls = lmotor.get_position().unwrap() as i32;
-                        crs = rmotor.get_position().unwrap() as i32;
+                        let is_reset_degrees = val.3;
+                        if is_reset_degrees {
+                            cls = lmotor.get_position().unwrap() as i32;
+                            crs = rmotor.get_position().unwrap() as i32;
+                        }
                     },
                     Err(_) => { break; }
                 }
@@ -292,6 +300,7 @@ impl MotorPair {
         else { self.rmotor.stop().unwrap(); }
     }
 
+    //TODO fix code repetition
     pub fn set_steering(&mut self, steering: i32, speed: i32) {
         let mut lmot;
         let mut rmot;
@@ -303,8 +312,8 @@ impl MotorPair {
             rmot = speed;
         }
         
-        //self.set_speed(lmot, rmot);
-        self.send_ch.send((lmot, rmot, false));
+        self.set_speed(lmot, rmot);
+        //self.send_ch.send((lmot, rmot, false, true));
     }
     
     pub fn set_pid_steering(&mut self, steering: i32, speed: i32) {
@@ -317,7 +326,23 @@ impl MotorPair {
             lmot = speed + steering * speed / 50 ;
             rmot = speed;
         }
-        self.send_ch.send((lmot, rmot, true));
+        self.set_speed(lmot, rmot);
+        // self.send_ch.send((lmot, rmot, true, true));
+        // self.send_ch.send((lmot, rmot, false, true));
+    }
+
+    pub fn set_pid_steering_no_reset(&mut self, steering: i32, speed: i32) {
+        let mut lmot;
+        let mut rmot;
+        if steering > 0 {
+            lmot = speed;
+            rmot = speed - steering * speed / 50 ;
+        } else {
+            lmot = speed + steering * speed / 50 ;
+            rmot = speed;
+        }
+        // self.send_ch.send((lmot, rmot, true, false));
+        self.send_ch.send((lmot, rmot, false, false));
     }
 
     pub fn go_on_degrees(&mut self, speed: i32, degrees: i32) {
@@ -326,10 +351,12 @@ impl MotorPair {
 
         self.set_pid_steering(0, speed);
 
-        while 
-        (((self.lmotor.get_position().unwrap() as i32) - cl).abs() < degrees)
-        || (((self.rmotor.get_position().unwrap() as i32) - cr).abs() < degrees) {
-            thread::sleep(time::Duration::from_millis(10));
+        while {
+            let l_diff = ((self.lmotor.get_position().unwrap() as i32) - cl);
+            let r_diff = ((self.rmotor.get_position().unwrap() as i32) - cr);
+            (l_diff.abs() < degrees) && (r_diff.abs() < degrees)
+        }{
+            // thread::sleep(time::Duration::from_millis(10));
         }
     }
 
@@ -340,11 +367,15 @@ impl MotorPair {
 
         self.set_pid_steering(steering, speed);
 
-        while 
-        (((self.lmotor.get_position().unwrap() as i32) - cl).abs() < degrees)
-        && (((self.rmotor.get_position().unwrap() as i32) - cr).abs() < degrees) {
-            //thread::sleep(time::Duration::from_millis(10));
+        // eprintln!("DEGREES: {}", degrees);
+        while {
+            let l_diff = ((self.lmotor.get_position().unwrap() as i32) - cl);
+            let r_diff = ((self.rmotor.get_position().unwrap() as i32) - cr);
+            (l_diff.abs() < degrees) && (r_diff.abs() < degrees)
+        }{
+            // thread::sleep(time::Duration::from_millis(10));
         }
+
     }
 }
 
@@ -480,8 +511,11 @@ pub fn ride_line_degrees(
     let (ls, rs) = robot.sensor_pair.get_reflected_color();
     let error = error_fun(ls, rs);
     let diff = pid.step(error);
-
+    // let mut counter;
+    // counter = 1;
     loop {
+        // counter += 1;
+        // println!("{}", counter);
         let (ls, rs) = robot.sensor_pair.get_reflected_color();
         let error = error_fun(ls, rs);
         let diff = pid.step(error);
@@ -530,6 +564,7 @@ pub fn ride_line_cross(
     }
     #[inline]
     fn both_err(l: i32, r: i32) -> i32{
+        // ????? wut?
         (((l - r) as f32)) as i32
     }
 

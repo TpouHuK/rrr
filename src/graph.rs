@@ -137,7 +137,7 @@ pub fn goto_point(
 
     let start_point = petgraph::graph::NodeIndex::<u32>::new(sp_i as usize);
     let finish_point = petgraph::graph::NodeIndex::<u32>::new(fp_i as usize);
-    println!("S:{:?}, F:{:?}", start_point, finish_point);
+    //println!("S:{:?}, F:{:?}", start_point, finish_point);
 
     let (cost, path) = petgraph::algo::astar(
         &graph,
@@ -149,7 +149,7 @@ pub fn goto_point(
 
     let mut current_point = graph.node_weight(start_point).unwrap();
     let mut current_ang: i32 = current_ang;
-    println!("{:#?}", path);
+    //println!("{:#?}", path);
     let mut action_array: Vec<MoveAction> = Vec::with_capacity(path.len());
 
     // Skip start point
@@ -178,13 +178,13 @@ pub fn goto_point(
         let mut is_first_start = true;
         let mut is_passed_start = false;
 
-        println!("st_ang: {}", start_angle);
+        //println!("st_ang: {}", start_angle);
         for edge in cur_neighbors.iter() {
-            println!("edge_ang: {}", edge.angle);
+            //println!("edge_ang: {}", edge.angle);
             if edge.angle == start_angle {
                 if is_inside {
                     is_inside = false;
-                    println!("FIRST START FAAALSE");
+                    //println!("FIRST START FAAALSE");
                     is_first_start = false;
                 } else {
                     is_inside = true;
@@ -227,24 +227,24 @@ pub fn goto_point(
             is_first_start = false;
         }
 
-        println!("{}, {}", diff, is_first_start);
-        println!("I:{}, O:{}", inside_edges, outside_edges);
+        //println!("{}, {}", diff, is_first_start);
+        //println!("I:{}, O:{}", inside_edges, outside_edges);
         if (diff > 0) && (is_first_start) {
             //turn right inside times
             action_array.push(MoveAction::Rotate(inside_edges + 1));
-            println!("Turn right inside times");
+            //println!("Turn right inside times");
         } else if (diff > 0) && !(is_first_start) {
             //turn right outside times
             action_array.push(MoveAction::Rotate(outside_edges + 1));
-            println!("Turn right outside times");
+            //println!("Turn right outside times");
         } else if (diff < 0) && (is_first_start) {
             //turn left outside times
             action_array.push(MoveAction::Rotate(-(outside_edges + 1)));
-            println!("Turn left outside times");
+            //println!("Turn left outside times");
         } else if (diff < 0) && !(is_first_start) {
             //turn left inside times
             action_array.push(MoveAction::Rotate(-(inside_edges + 1)));
-            println!("Turn left inside times");
+            //println!("Turn left inside times");
         }
 
 
@@ -259,7 +259,7 @@ pub fn goto_point(
                     if ((edge.angle > start) && (edge.angle < 360)) ||
                         ((edge.angle < finish) && (edge.angle >= 0)) { return true }
                 }
-                println!("shit");
+                //println!("shit");
             }
             return false
         };
@@ -285,17 +285,17 @@ pub fn goto_point(
 
        let right_start = normalize_ang(target_ang + 70);
        let right_finish = normalize_ang(target_ang + 110);
-       println!("{}, {}: aaa", right_start, right_finish);
+       //println!("{}, {}: aaa", right_start, right_finish);
 
-       println!("right_start");
+       //println!("right_start");
        let is_left_line = is_something_inside(left_start, left_finish);
        let is_right_line = is_something_inside(right_start, right_finish);
-       println!("right_finish");
+       //println!("right_finish");
 
-       println!("{}, {}", is_left_line, is_right_line);
-       println!("{:?}", current_point.name);
-       println!("{:?}", target_ang);
-       println!("===================");
+       //println!("{}, {}", is_left_line, is_right_line);
+       //println!("{:?}", current_point.name);
+       //println!("{:?}", target_ang);
+       //println!("===================");
 
        if is_left_line && is_right_line {
            action_array.push(MoveAction::LineRide(LineRide::CrossStop));

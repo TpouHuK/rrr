@@ -54,10 +54,12 @@ enum TypeOfMove {
     LineDegrees((i32)),
     Degrees(i32, i32),
     RightOutLine,
+    JoystickWrite,
 }
 
 fn main() {
     println!("Launched");
+    //FIXMEEE PLEEEASEEE alkdjflkzxjcv;lkjasdf
     let is_goto_running = Arc::new((Mutex::new(false), Condvar::new()));
     let is_goto_running_c = is_goto_running.clone();
     let is_goto_running_c2 = is_goto_running.clone();
@@ -67,6 +69,7 @@ fn main() {
     let is_goto_running_c6 = is_goto_running.clone();
     let is_goto_running_c7 = is_goto_running.clone();
     let is_goto_running_c8 = is_goto_running.clone();
+    let is_goto_running_c9 = is_goto_running.clone();
 
     let (send_ch, receive_ch) = std::sync::mpsc::channel();
     let send_ch2 = send_ch.clone();
@@ -75,6 +78,7 @@ fn main() {
     let send_ch5 = send_ch.clone();
     let send_ch6 = send_ch.clone();
     let send_ch7 = send_ch.clone();
+    let send_ch8 = send_ch.clone();
 
     let mut kpidb = Arc::new(Mutex::new((DEFAULT_KP,
                                         DEFAULT_KI,
@@ -173,6 +177,114 @@ fn main() {
                     {mspeed = *kmspeed.lock().unwrap()};
                     robot.motor_pair.steer_on_degrees(steering, mspeed, degrees);
                     robot.motor_pair.set_steering(0, 0);
+                },
+                TypeOfMove::JoystickWrite => {
+                    use ev3dev_lang_rust::tacho_motor::TachoMotor;
+                    use std::sync::mpsc;
+                    let mut speed;
+                    {speed = *kmspeed.lock().unwrap()};
+
+                    let mut port = Port::new();
+
+                    // needs review of that channels use
+                    // probably condvar or smthing like that
+                    // need to be used
+                    let (t_run, r_run) = mpsc::sync_channel::<()>(1);
+
+                    let state = Arc::new(Mutex::new(joystick::GamePadState::new()));
+                    let state_c = state.clone();
+
+                    // Joystick read info thread
+                    thread::spawn(move ||{
+                        loop {
+                            match r_run.try_recv() {
+                                Ok(_) => {},
+                                Err(e) => match e {
+                                    mpsc::TryRecvError::Disconnected => { break; },
+                                    mpsc::TryRecvError::Empty => {},
+                                }
+                            }
+
+                            port.poll();
+                            if let Some(v) = port.get(0) {
+                                {
+                                    state_c.lock().unwrap().consume_device(v)
+                                }
+                            } else {
+                                eprintln!("Joystick not found!");
+                            }
+                        }
+                        eprintln!("Joystick read thread ended");
+                    });
+
+                    let mut steering = 0;
+                    let mut mstate = 0;
+                    let mut jstate = 0;
+
+                    let mut lc = robot.motor_pair.lmotor.get_position().unwrap() as i32;
+                    let mut rc = robot.motor_pair.rmotor.get_position().unwrap() as i32;
+
+                    let mut val;
+                    loop {
+                        { val = *state.lock().unwrap(); }
+                        if jstate == 0 {
+                            if val.rt_b {
+                                if mstate != 1{
+                                    robot.motor_pair.set_pid_steering(steering, speed);
+                                    mstate = 1;
+                                }
+                            } else if val.lt_b {
+                                if mstate != -1{
+                                    robot.motor_pair.set_pid_steering(steering, -speed);
+                                    mstate = -1;
+                                }
+                                
+                            } else if val.cross {
+                                steering = val.lx*100/128;
+                            } else if val.circle {
+                                lc = robot.motor_pair.lmotor.get_position().unwrap() as i32;
+                                rc = robot.motor_pair.rmotor.get_position().unwrap() as i32;
+                            } else if val.triangle {
+                                jstate = 1;
+                                thread::sleep(time::Duration::from_millis(500));
+                            } else if val.square {
+                                if mstate != 0 {
+                                    continue
+                                }
+                                let tlc = robot.motor_pair.lmotor.get_position().unwrap() as i32;
+                                let trc = robot.motor_pair.rmotor.get_position().unwrap() as i32;
+                                eprintln!("L:{}, R:{}, STR:{}", -(tlc - lc), trc - rc, steering);
+                                println!("L:{}, R:{}, STR:{}", -(tlc - lc), trc - rc, steering);
+                                thread::sleep(time::Duration::from_millis(1000));
+                            } else if val.share {
+                                if mstate == 0 {
+                                    thread::sleep(time::Duration::from_millis(1000));
+                                    break;
+                                }
+                            } else {
+                                if mstate != 0 {
+                                    robot.motor_pair.set_steering(0, 0);
+                                    mstate = 0;
+                                }
+                            }
+                        } else if jstate == 2 {
+                            if val.rt_b {
+                            } else if val.lt_b {
+                            } else if val.cross {
+                            } else if val.circle {
+                            } else if val.triangle {
+                                jstate = 0;
+                                thread::sleep(time::Duration::from_millis(500));
+                            } else if val.square {
+                            } else if val.share {
+                            } else {
+                            }
+                        }
+                        t_run.send(());
+                        thread::sleep(time::Duration::from_millis(10));
+                    }
+                    println!("Testing");
+                    //end
                 },
             }
 
@@ -374,6 +486,16 @@ fn main() {
             Ok(())
         };
 
+        let joystick_write = move |_c: Context, _:()| {
+            let (mutex, condvar) = &*is_goto_running_c9;
+            {
+                let mut running = mutex.lock().unwrap();
+                *running = true;
+            }
+            send_ch8.send(TypeOfMove::JoystickWrite).unwrap();
+            Ok(())
+        };
+
         macro_rules! create_lua_func {
             ($lua_ctx:ident, $rust_func:expr, $lua_name:expr) => {
                 $lua_ctx.globals().set($lua_name, 
@@ -405,7 +527,7 @@ fn main() {
         create_lua_func!(lua_ctx, set_rotate, "r_set_rotate");
 
         create_lua_func!(lua_ctx, joystick_write, "r_joystick_write");
-        create_lua_func!(lua_ctx, joystick_line, "r_joystick_line");
+        // create_lua_func!(lua_ctx, joystick_line, "r_joystick_line");
 
         // No r_sleep, special case >_<
         create_lua_func!(lua_ctx, lua_sleep, "sleep");
@@ -424,6 +546,7 @@ fn main() {
 use stick::Port;
 use stick;
 
+/*
 fn joystick_write(_c: Context, _:()) -> Result<()>{
     use ev3dev_lang_rust::tacho_motor::TachoMotor;
     let speed = 10;
@@ -482,15 +605,13 @@ fn joystick_write(_c: Context, _:()) -> Result<()>{
                 mstate = 0;
             }
         }
-        //println!("{:?}", val);
-        //println!("printing");
         thread::sleep(time::Duration::from_millis(10));
     }
     Ok(())
-}
+} */
 
 
-fn joystick_line(_c: Context, _:()) -> Result<()>{
+/* fn joystick_line(_c: Context, _:()) -> Result<()>{
     let speed = 20;
     let degrees = 20;
     let mut port = Port::new();
@@ -574,4 +695,4 @@ fn joystick_line(_c: Context, _:()) -> Result<()>{
     }
 
     Ok(())
-}
+} */
