@@ -119,8 +119,8 @@ end
 
 function set_lift(where)
 	if where == "up" then degrees = 0
-	elseif where == "take_cable"   then degrees = 570
-	elseif where == "put_cable"    then degrees = 460
+	elseif where == "take_wire"   then degrees = 570
+	elseif where == "put_wire"    then degrees = 460
 	elseif where == "take_router"  then degrees = 400
 	elseif where == "shake_router" then degrees = 150
 	elseif where == "put_router"   then degrees = 500
@@ -156,9 +156,17 @@ end
 
 function shake()
 	local DEGREES = 20
+	ride_degrees_steer(0, DEGREES, 10)
+	sleep(1)
+	ride_degrees_steer(0, DEGREES, -10)
+	sleep(1)
+
 	ride_degrees_steer(-100, DEGREES, 10)
+	sleep(1)
 	ride_degrees_steer(-100, DEGREES*2, -10)
+	sleep(1)
 	ride_degrees_steer(-100, DEGREES, 10)
+	sleep(1)
 end
 
 function put_router(color, side)
@@ -186,78 +194,93 @@ function put_router(color, side)
 	set_lift("up")
 	set_rotate(0)
 
+	local DEGREES
+	local LONG_DEGREES = 240
+
 	if side == "long" then
 		-- longride
+		line_degrees(LONG_DEGREES) -- forward
+		
 	elseif side == "short" then
-		if where == 0 then
-			DEGREES = 160
-			set_rotate(0)
-			line_degrees(DEGREES) -- forward
+		-- nothing
+	end
 
-			sleep(1)
-			set_lift("shake_router")
-			shake()
-			set_lift("put_router")
+	if where == 0 then
+		DEGREES = 160
+		set_rotate(0)
+		line_degrees(DEGREES) -- forward
 
-			ride_degrees(DEGREES, -20) -- return
-			set_lift("up")
+		sleep(1)
+		set_lift("shake_router")
+		shake()
+		set_lift("put_router")
 
-		elseif where == 1 then
-			DEGREES = 130
-			set_rotate(1)
-			line_degrees(DEGREES) -- forward
+		ride_degrees(DEGREES, -20) -- return
+		set_lift("up")
 
-			ride_degrees_steer(-20, 50) -- steering right
+	elseif where == 1 then
+		DEGREES = 130
+		set_rotate(1)
+		line_degrees(DEGREES) -- forward
 
-			sleep(1)
-			set_lift("shake_router")
-			shake()
-			set_lift("put_router")
-			set_rotate(0)
-			set_rotate(3)
-			set_lift("up")
+		ride_degrees_steer(-20, 50) -- steering right
 
-			ride_degrees_steer(-20, 50, -20) -- steering back right
-			ride_degrees(DEGREES, -20) 
+		sleep(1)
+		set_lift("shake_router")
+		shake()
+		set_lift("put_router")
+		set_rotate(0)
+		set_rotate(3)
+		set_lift("up")
 
-			set_lift("up")
-			set_rotate(0)
+		ride_degrees_steer(-20, 50, -20) -- steering back right
+		ride_degrees(DEGREES, -20) 
 
-		elseif where == 3 then
-			DEGREES = 150
-			set_rotate(3)
-			line_degrees(DEGREES) -- forward
+		set_lift("up")
+		set_rotate(0)
 
-			ride_degrees_steer(20, 50) -- steering right
+	elseif where == 3 then
+		DEGREES = 130
+		set_rotate(3)
+		line_degrees(DEGREES) -- forward
 
-			sleep(1)
-			set_lift("shake_router")
-			shake()
-			set_lift("put_router")
-			set_rotate(0)
-			set_rotate(1)
-			set_lift("up")
+		ride_degrees_steer(20, 50) -- steering right
 
-			ride_degrees_steer(20, 50, -20) -- steering back right
-			ride_degrees(DEGREES, -20) 
+		sleep(1)
+		set_lift("shake_router")
+		shake()
+		set_lift("put_router")
+		set_rotate(0)
+		set_rotate(1)
+		set_lift("up")
 
-			set_lift("up")
-			set_rotate(0)
+		ride_degrees_steer(20, 50, -20) -- steering back right
+		ride_degrees(DEGREES, -20) 
 
-		elseif where == 2 then
-			DEGREES = 180
-			set_rotate(2) 
-			line_degrees(DEGREES) -- forward
+		set_lift("up")
+		set_rotate(0)
 
-			sleep(1)
-			set_lift("shake_router")
-			shake()
-			set_lift("put_router")
+	elseif where == 2 then
+		DEGREES = 180
+		set_rotate(2) 
+		line_degrees(DEGREES) -- forward
 
-			set_rotate(0)
-			set_lift("up")
-			ride_degrees(DEGREES, -20) -- return
-		end
+		sleep(2)
+		set_lift("shake_router")
+		shake()
+		set_lift("put_router")
+
+		set_rotate(0)
+		set_lift("up")
+		ride_degrees(DEGREES, -20) -- return
+	end
+
+	if side == "long" then
+		-- longride
+		ride_degrees(LONG_DEGREES, -20) -- return
+		
+	elseif side == "short" then
+		-- nothing
 	end
 
 end
@@ -288,32 +311,38 @@ function main()
 
 end
 
-function take_cable()
+
+function put_wire(num)
+	if num == 1 then
+		goto_point("7")
+		rotate_to_point("23")
+	elseif num == 2 then
+		goto_point("38")
+		rotate_to_point("16")
+	end
+
+	line_degrees(410)
+	ride_degrees(240)
+	set_lift("put_wire")
+	set_lift("up")
+	ride_degrees(410 + 240, -20) 
+end
+
+function get_wire(wire_num)
+	if wire_num == 1 then
+		goto_point("44")
+		rotate_to_point("39")
+	elseif wire_num == 2 then
+		goto_point("45")
+		rotate_to_point("43")
+	end
+
 	line_degrees(250)
-	set_lift("take_cable")
+	set_lift("take_wire")
 	set_lift("up")
 	ride_degrees(250, -20) 
 end
 
-
-function get_wire(num)
-	if num == 1 then
-	elseif num == 1 then
-	end
-end
-
-function get_1_wire()
-	goto_point("44")
-	rotate_to_point("39")
-	take_cable()
-end
-
-function put_1_wire()
-	gotop("7")
-	rotate_to_point("23")
-	wait_till_arrival()
-	give_cable()
-end
 
 function test_line()
 	while true do
@@ -341,14 +370,16 @@ main()
 -- set_lift("up")
 -- exit()
 
--- get_router(1)
 fake_read()
-put_router("red", "short")
--- ride_degrees(360, 20) 
--- ride_degrees(360, -20) 
--- get_router(2)
--- put_router("blue", "short")
--- get_router(3)
--- put_router("yellow", "short")
--- get_router(4)
--- put_router("green", "short")
+get_wire(1)
+put_wire(1)
+get_wire(2)
+put_wire(2)
+get_router(1)
+put_router("red", "long")
+get_router(2)
+put_router("blue", "long")
+get_router(3)
+put_router("yellow", "short")
+get_router(4)
+put_router("green", "short")
