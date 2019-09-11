@@ -1,3 +1,5 @@
+-- SERVICE FUNCTIONS[[ 
+-- === === === === === ===
 function goto_point(point)
 	r_goto_point(point)
 	r_wait_till_arrival()
@@ -36,19 +38,15 @@ function ride_degrees_steer(steer, degrees, speed)
 	set_defaults()
 end
 
-function start_line_ride()
-	r_rolls()
-	read_markers()
-	r_wait_till_arrival()
-	ride_degrees(100)
+function black_white_cs()
+	h, s, v = get_cs_hsv()
+	if v > 40 then
+		return 'white'
+	else
+		return 'black'
+	end
 end
 
-function start_degrees_ride()
-	ride_degrees(320)
-	ride_degrees_steer(-100, 110)
-	ride_degrees(90)
-	ride_degrees_steer(100, 110)
-end
 
 function ride_joystick_degrees()
 	r_joystick_write()
@@ -83,6 +81,29 @@ function get_color()
 		return "blue"
 	end
 	return "none"
+end
+
+function set_current_pos(POINT, ROTATION)
+	CUR_POINT = POINT
+	CUR_ANG = ROTATION
+end
+-- === === === === === ===
+-- ]] 
+
+-- MAIN FUNCTIONS [[
+-- === === === === === ===
+function start_line_ride()
+	r_rolls()
+	read_markers()
+	r_wait_till_arrival()
+	ride_degrees(100)
+end
+
+function start_degrees_ride()
+	ride_degrees(320)
+	ride_degrees_steer(-100, 110)
+	ride_degrees(90)
+	ride_degrees_steer(100, 110)
 end
 
 function read_markers()
@@ -299,16 +320,12 @@ function set_defaults()
 	r_set_middle_grey(35)
 	r_set_black(20)
 
+	routers = {}
+	for i=1, 6 do
+		routers[i] = "unknown"
+	end
+
 	D_ride_degrees_speed = 10
-end
-
-function main()
-	-- CUR_POINT = "13"
-	-- CUR_ANG = 0
-	CUR_POINT = "9"
-	CUR_ANG = 270
-	set_defaults()
-
 end
 
 
@@ -356,30 +373,67 @@ function test_line()
 	end
 end
 
+
+function check_router(cub_n)
+	if     cub_n == 1 then gt = "6"; rt = "7";
+	elseif cub_n == 2 then gt = "7"; rt = "8";
+	elseif cub_n == 3 then gt = "8"; rt = "37";
+	elseif cub_n == 4 then gt = "1"; rt = "2";
+	elseif cub_n == 5 then gt = "2"; rt = "3";
+	elseif cub_n == 6 then gt = "3"; rt = "45";
+	end
+
+	goto_point(gt)
+	rotate_to_point(rt)
+
+	return black_white_cs()
+end
+
+
 function fake_read()
 	current_colors_i = {red=1, blue=2, green=3, yellow=4}
 end
 
-main()
+function start()
+	start_degrees_ride()
+	start_line_ride()
+	set_current_pos("13", 270)
+end
 
--- start_degrees_ride()
--- start_line_ride()
+function finish()
+	goto_point(30)
+	ride_degrees(400)
+end
 
--- set_lift("take_router")
--- sleep(3)
--- set_lift("up")
--- exit()
+-- === === === === === ===
+-- ]]
+set_defaults()
 
-fake_read()
-get_wire(1)
-put_wire(1)
-get_wire(2)
-put_wire(2)
-get_router(1)
-put_router("red", "long")
-get_router(2)
-put_router("blue", "long")
-get_router(3)
-put_router("yellow", "short")
-get_router(4)
-put_router("green", "short")
+start()
+
+-- checking routers
+for i=1, 6 do
+	routers[i] = check_router(i)
+end
+
+
+function get_any_black()
+	for index, val in ipairs(routers) do
+		if val == "black" then
+			return index
+		end
+	end
+end
+
+current_routers_count = 0
+while has_value(routers, "black") do
+	i = get_any_black()
+	get_router(i)
+	current_routers_count += 1
+	if     current_routers_count == 1 then put_router("red", "short")
+	elseif current_routers_count == 2 then put_router("blue", "short")
+	elseif current_routers_count == 3 then put_router("green", "short")
+	elseif current_routers_count == 4 then put_router("yellow", "short")
+	end
+end
+finish()
