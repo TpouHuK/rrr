@@ -45,34 +45,6 @@ function get_color()
 	return "none"
 end
 
-function take_cable()
-	set_lspeed(20)
-	line_degrees(250)
-	set_vars()
-	
-	set_lift(-570)
-	set_lift(0)
-
-	unmacro("0,0,0,0,0,0,0,0,0,0,0,0,0,0,0")
-	wait_till_arrival()
-end
-
-function give_cable()
-	set_lspeed(20)
-	ride_line_degrees(410)
-	wait_till_arrival()
-	macro("0,0,0,0,0,0,0,0,0,0,0,0")
-	wait_till_arrival()
-
-	set_vars()
-	
-	set_lift(-460)
-	set_lift(0)
-
-	unmacro("0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0")
-	wait_till_arrival()
-end
-
 function read_colors()
 	current_colors = {}
 	while (#current_colors ~= 4) do
