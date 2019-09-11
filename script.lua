@@ -39,7 +39,7 @@ function ride_degrees_steer(steer, degrees, speed)
 end
 
 function black_white_cs()
-	h, s, v = get_cs_hsv()
+	h, s, v = r_get_cs_hsv()
 	if v > 40 then
 		return 'white'
 	else
@@ -310,11 +310,11 @@ function set_defaults()
 	r_set_pid(0.5, 0, 20.0)
 	r_set_pidb(0.5, 0, 20.0)
 
-	r_set_lspeed(30)
+	r_set_lspeed(50)
 	r_set_ldegrees(90)
 
-	r_set_rspeed(10)
-	r_set_mspeed(10)
+	r_set_rspeed(40)
+	r_set_mspeed(30)
 
 	r_set_white(50)
 	r_set_middle_grey(35)
@@ -397,7 +397,7 @@ end
 function start()
 	start_degrees_ride()
 	start_line_ride()
-	set_current_pos("13", 270)
+	set_current_pos("13", 0)
 end
 
 function finish()
@@ -410,30 +410,6 @@ end
 set_defaults()
 
 start()
-
--- checking routers
-for i=1, 6 do
-	routers[i] = check_router(i)
-end
-
-
-function get_any_black()
-	for index, val in ipairs(routers) do
-		if val == "black" then
-			return index
-		end
-	end
-end
-
-current_routers_count = 0
-while has_value(routers, "black") do
-	i = get_any_black()
-	get_router(i)
-	current_routers_count += 1
-	if     current_routers_count == 1 then put_router("red", "short")
-	elseif current_routers_count == 2 then put_router("blue", "short")
-	elseif current_routers_count == 3 then put_router("green", "short")
-	elseif current_routers_count == 4 then put_router("yellow", "short")
-	end
-end
+get_router(1)
+put_router("red", "long")
 finish()
