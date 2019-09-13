@@ -189,6 +189,8 @@ impl MotorPair {
         }; 
 
         //New init
+        lmotor.set_stop_action(tacho_motor::STOP_ACTION_HOLD.to_string()).unwrap();
+        rmotor.set_stop_action(tacho_motor::STOP_ACTION_HOLD.to_string()).unwrap();
         let (tx, rx) = mpsc::sync_channel::<(i32, i32, bool, bool)>(1);
 
     thread::spawn(move || {
