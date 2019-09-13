@@ -312,5 +312,6 @@ pub fn goto_point(
        current_ang = target_ang;
     }
 
+    //println!("{:?}", action_array);
     return (action_array, current_ang);
 }
