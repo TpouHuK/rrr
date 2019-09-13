@@ -1,4 +1,4 @@
--- SERVICE FUNCTIONS[[ 
+-- SERVICE FUNCTIONS
 -- === === === === === ===
 function goto_point(point)
 	r_goto_point(point)
@@ -88,9 +88,8 @@ function set_current_pos(POINT, ROTATION)
 	CUR_ANG = ROTATION
 end
 -- === === === === === ===
--- ]] 
 
--- MAIN FUNCTIONS [[
+-- MAIN FUNCTIONS 
 -- === === === === === ===
 function start_line_ride()
 	r_rolls()
@@ -163,9 +162,9 @@ function get_router(cub_n)
 	rotate_to_point(rt)
 
 	set_rotate(0)
-	ride_degrees(100, -10)
+	ride_degrees(100, -10, D_router_get_speed)
 	set_lift("take_router")
-	ride_degrees(100)
+	ride_degrees(100, D_router_get_speed)
 	set_lift("up")
 end
 
@@ -178,16 +177,16 @@ end
 function shake()
 	local DEGREES = 20
 	ride_degrees_steer(0, DEGREES, 10)
-	sleep(1)
+	-- sleep(1)
 	ride_degrees_steer(0, DEGREES, -10)
-	sleep(1)
+	-- sleep(1)
 
 	ride_degrees_steer(-100, DEGREES, 10)
-	sleep(1)
+	-- sleep(1)
 	ride_degrees_steer(-100, DEGREES*2, -10)
-	sleep(1)
+	-- sleep(1)
 	ride_degrees_steer(-100, DEGREES, 10)
-	sleep(1)
+	-- sleep(1)
 end
 
 function put_router(color, side)
@@ -307,16 +306,16 @@ function put_router(color, side)
 end
 
 function set_defaults()
-	r_set_pid(0.5, 0, 20.0)
-	r_set_pidb(0.5, 0, 20.0)
+	r_set_pid(0.6, 0, 25.0)
+	r_set_pidb(0.6, 0, 25.0)
 
-	r_set_lspeed(50)
-	r_set_ldegrees(90)
+	r_set_lspeed(30)
+	r_set_ldegrees(80)
 
-	r_set_rspeed(40)
-	r_set_mspeed(30)
+	r_set_rspeed(20)
+	r_set_mspeed(20)
 
-	r_set_white(50)
+	r_set_white(40)
 	r_set_middle_grey(35)
 	r_set_black(20)
 
@@ -325,7 +324,8 @@ function set_defaults()
 		routers[i] = "unknown"
 	end
 
-	D_ride_degrees_speed = 10
+	D_ride_degrees_speed = 20
+	D_router_get_speed = 10
 end
 
 
@@ -402,14 +402,41 @@ end
 
 function finish()
 	goto_point(30)
-	ride_degrees(400)
+	set_lift("take_wire")
+	ride_degrees(300)
+	set_lift("up")
+end
+
+function testline()
+	goto_point("11")
+	goto_point("32")
+	goto_point("37")
+	goto_point("21")
+
+	goto_point("11")
 end
 
 -- === === === === === ===
--- ]]
 set_defaults()
 
-start()
+-- start()
+set_current_pos("2", 0)
+goto_point("0")
+panic()
+-- testline()
+
+get_wire(1)
+put_wire(1)
+get_wire(2)
+put_wire(2)
+---[[ 
 get_router(1)
 put_router("red", "long")
+get_router(2)
+put_router("blue", "long")
+get_router(3)
+put_router("green", "long")
+get_router(4)
+put_router("yellow", "long")
 finish()
+--]]
