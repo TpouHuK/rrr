@@ -328,9 +328,12 @@ impl MotorPair {
             lmot = speed + steering * speed / 50 ;
             rmot = speed;
         }
-        self.set_speed(lmot, rmot);
-        // self.send_ch.send((lmot, rmot, true, true));
-        // self.send_ch.send((lmot, rmot, false, true));
+        //self.set_speed(lmot, rmot);
+        if speed != 0 {
+            self.send_ch.send((lmot, rmot, true, true));
+        } else {
+            self.send_ch.send((lmot, rmot, false, true));
+        }
     }
 
     pub fn set_pid_steering_no_reset(&mut self, steering: i32, speed: i32) {
@@ -351,7 +354,7 @@ impl MotorPair {
         let cl = self.lmotor.get_position().unwrap() as i32;
         let cr = self.rmotor.get_position().unwrap() as i32;
 
-        self.set_pid_steering(0, speed);
+        self.set_steering(0, speed);
 
         while {
             let l_diff = ((self.lmotor.get_position().unwrap() as i32) - cl);
@@ -377,7 +380,7 @@ impl MotorPair {
         }{
             // thread::sleep(time::Duration::from_millis(10));
         }
-
+        self.set_pid_steering(0, 0);
     }
 }
 
@@ -645,7 +648,7 @@ pub fn ride_line_right_stop(
 }
 
 pub fn turn_count(robot: &mut RobotMoveBase, count: i32, speed: i32) {
-    println!("count turn: {}", count);
+    // println!("count turn: {}", count);
     if count == 0 { return }
     if count > 0 {
         //turning right

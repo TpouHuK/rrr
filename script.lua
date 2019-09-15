@@ -1,5 +1,9 @@
 -- SERVICE FUNCTIONS
 -- === === === === === ===
+function sleep(secs)
+	r_sleep(secs*1000)
+end
+
 function goto_point(point)
 	r_goto_point(point)
 	r_wait_till_arrival()
@@ -10,9 +14,15 @@ function rotate_to_point(point)
 	r_wait_till_arrival()
 end
 
-function line_degrees(degrees)
+function line_degrees(degrees, speed)
+	if speed then
+		r_set_lspeed(speed)
+	end
 	r_ride_line_degrees(degrees)
 	r_wait_till_arrival()
+	if speed then
+		set_defaults()
+	end
 end
 
 function set_rotate(pos)
@@ -142,7 +152,7 @@ function set_lift(where)
 	elseif where == "take_wire"   then degrees = 570
 	elseif where == "put_wire"    then degrees = 460
 	elseif where == "take_router"  then degrees = 400
-	elseif where == "shake_router" then degrees = 150
+	elseif where == "shake_router" then degrees = 100
 	elseif where == "put_router"   then degrees = 500
 	end
 
@@ -164,7 +174,7 @@ function get_router(cub_n)
 	set_rotate(0)
 	ride_degrees(100, -10, D_router_get_speed)
 	set_lift("take_router")
-	ride_degrees(100, D_router_get_speed)
+	line_degrees(100, D_router_get_speed)
 	set_lift("up")
 end
 
@@ -175,21 +185,22 @@ function pr_short(color)
 end
 
 function shake()
-	local DEGREES = 20
-	ride_degrees_steer(0, DEGREES, 10)
-	-- sleep(1)
-	ride_degrees_steer(0, DEGREES, -10)
-	-- sleep(1)
+	-- do return end
+	local DEGREES = 40
+	r_set_mspeed(40)
+	for i=1,1 do
+		ride_degrees_steer(0, DEGREES, 10)
+		ride_degrees_steer(0, DEGREES, -10)
 
-	ride_degrees_steer(-100, DEGREES, 10)
-	-- sleep(1)
-	ride_degrees_steer(-100, DEGREES*2, -10)
-	-- sleep(1)
-	ride_degrees_steer(-100, DEGREES, 10)
-	-- sleep(1)
+		ride_degrees_steer(-100, DEGREES, 10)
+		ride_degrees_steer(-100, DEGREES*2, -10)
+		ride_degrees_steer(-100, DEGREES, 10)
+	end
+	set_defaults()
 end
 
 function put_router(color, side)
+	local PUT_ROUTER_SPEED = 10
 	if side == "long" then 
 		if     color == "red"    then gt = "6";  rt = "22"; rp = 1;
 		elseif color == "blue"   then gt = "8";  rt = "24"; rp = 1;
@@ -215,8 +226,10 @@ function put_router(color, side)
 	set_rotate(0)
 
 	local DEGREES
-	local LONG_DEGREES = 240
+	local LONG_DEGREES = 250
 
+	r_set_lspeed(PUT_ROUTER_SPEED)
+	r_set_mspeed(PUT_ROUTER_SPEED)
 	if side == "long" then
 		-- longride
 		line_degrees(LONG_DEGREES) -- forward
@@ -225,12 +238,14 @@ function put_router(color, side)
 		-- nothing
 	end
 
+
+	local SLEEP_TIME = 0.5
 	if where == 0 then
 		DEGREES = 160
 		set_rotate(0)
 		line_degrees(DEGREES) -- forward
 
-		sleep(1)
+		sleep(SLEEP_TIME)
 		set_lift("shake_router")
 		shake()
 		set_lift("put_router")
@@ -245,7 +260,7 @@ function put_router(color, side)
 
 		ride_degrees_steer(-20, 50) -- steering right
 
-		sleep(1)
+		sleep(SLEEP_TIME)
 		set_lift("shake_router")
 		shake()
 		set_lift("put_router")
@@ -266,7 +281,7 @@ function put_router(color, side)
 
 		ride_degrees_steer(20, 50) -- steering right
 
-		sleep(1)
+		sleep(SLEEP_TIME)
 		set_lift("shake_router")
 		shake()
 		set_lift("put_router")
@@ -285,7 +300,7 @@ function put_router(color, side)
 		set_rotate(2) 
 		line_degrees(DEGREES) -- forward
 
-		sleep(2)
+		sleep(SLEEP_TIME)
 		set_lift("shake_router")
 		shake()
 		set_lift("put_router")
@@ -294,10 +309,11 @@ function put_router(color, side)
 		set_lift("up")
 		ride_degrees(DEGREES, -20) -- return
 	end
+	set_defaults()
 
 	if side == "long" then
 		-- longride
-		ride_degrees(LONG_DEGREES, -20) -- return
+		ride_degrees(LONG_DEGREES-20, -20) -- return
 		
 	elseif side == "short" then
 		-- nothing
@@ -306,23 +322,19 @@ function put_router(color, side)
 end
 
 function set_defaults()
-	r_set_pid(0.6, 0, 25.0)
-	r_set_pidb(0.6, 0, 25.0)
+	r_set_pid(0.5, 0, 10.0)
+	r_set_pidb(0.5, 0, 10.0)
 
-	r_set_lspeed(30)
+	r_set_lspeed(40)
 	r_set_ldegrees(80)
 
-	r_set_rspeed(20)
+	r_set_rspeed(30)
 	r_set_mspeed(20)
 
 	r_set_white(40)
 	r_set_middle_grey(35)
 	r_set_black(20)
 
-	routers = {}
-	for i=1, 6 do
-		routers[i] = "unknown"
-	end
 
 	D_ride_degrees_speed = 20
 	D_router_get_speed = 10
@@ -338,11 +350,12 @@ function put_wire(num)
 		rotate_to_point("16")
 	end
 
+	local WIRE_DEGREES = 240
 	line_degrees(410)
-	ride_degrees(240)
+	ride_degrees(WIRE_DEGREES)
 	set_lift("put_wire")
 	set_lift("up")
-	ride_degrees(410 + 240, -20) 
+	ride_degrees(410 + WIRE_DEGREES - 20, -20) 
 end
 
 function get_wire(wire_num)
@@ -354,10 +367,11 @@ function get_wire(wire_num)
 		rotate_to_point("43")
 	end
 
-	line_degrees(250)
+	local GET_DEGREES = 250
+	line_degrees(GET_DEGREES)
 	set_lift("take_wire")
 	set_lift("up")
-	ride_degrees(250, -20) 
+	ride_degrees(GET_DEGREES, -20) 
 end
 
 
@@ -416,27 +430,99 @@ function testline()
 	goto_point("11")
 end
 
+function fulltest_run()
+	get_wire(1)
+	put_wire(2)
+	put_wire(1)
+	---[[ 
+	get_router(1)
+	put_router("red", "long")
+	get_router(2)
+	put_router("blue", "long")
+	get_router(4)
+	put_router("green", "short")
+	get_router(3)
+	put_router("yellow", "short")
+end
+
+function print_routers()
+	print(
+		routers[1],
+		routers[2],
+		routers[3],
+		routers[4],
+		routers[5],
+		routers[6]
+	)
+end
 -- === === === === === ===
 set_defaults()
 
--- start()
-set_current_pos("2", 0)
-goto_point("0")
-panic()
--- testline()
+start()
+routers = {}
+for i=1, 6 do
+	routers[i] = "unknown"
+end
 
-get_wire(1)
-put_wire(1)
+is_router_taken = false
+for i=4,6 do
+	routers[i] = check_router(i)
+	print(i, routers[i])
+	if (routers[i] == "black") and (not is_router_taken) then
+		routers[i] = "empty"
+		get_router(i)
+		is_router_taken = true
+	end
+end
 get_wire(2)
+
+put_router("yellow", "short")
 put_wire(2)
----[[ 
-get_router(1)
-put_router("red", "long")
-get_router(2)
+get_wire(1)
+
+routers[1] = check_router(1)
+routers[2] = check_router(2)
+put_wire(1)
+
+white_count = 0
+for _, v in ipairs(routers) do
+	if v == "white" then
+		white_count = white_count + 1
+	end
+end
+
+if white_count >= 2 then
+	routers[3] = "black"
+else
+	routers[3] = "white"
+end
+
+print_routers()
+-- blue
+for _,v in ipairs{2,3,1,4,5,6} do
+	if routers[v] == "black" then
+		routers[v] = "empty"
+		get_router(v)
+		break
+	end
+end
 put_router("blue", "long")
-get_router(3)
-put_router("green", "long")
-get_router(4)
-put_router("yellow", "long")
+-- red 
+for _,v in ipairs{3,6,2,1,4,5} do
+	if routers[v] == "black" then
+		routers[v] = "empty"
+		get_router(v)
+		break
+	end
+end
+put_router("red", "long")
+-- green 
+for _,v in ipairs{1,2,3,4,5,6} do
+	if routers[v] == "black" then
+		routers[v] = "empty"
+		get_router(v)
+		break
+	end
+end
+put_router("green", "short")
 finish()
---]]

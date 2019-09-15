@@ -324,7 +324,7 @@ fn main() {
             Ok(())
         };
         let lua_sleep = |_c, secs: u64|{
-            thread::sleep(time::Duration::from_secs(secs));
+            thread::sleep(time::Duration::from_millis(secs));
             Ok(())
         };
 
@@ -529,8 +529,7 @@ fn main() {
         create_lua_func!(lua_ctx, joystick_write, "r_joystick_write");
         // create_lua_func!(lua_ctx, joystick_line, "r_joystick_line");
 
-        // No r_sleep, special case >_<
-        create_lua_func!(lua_ctx, lua_sleep, "sleep");
+        create_lua_func!(lua_ctx, lua_sleep, "r_sleep");
 
         // Setuping global vars
         lua_ctx.globals().set("CUR_ANG", 0);
