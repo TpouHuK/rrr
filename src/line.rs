@@ -573,7 +573,7 @@ pub fn ride_line_cross(
         (((l - r) as f32)) as i32
     }
 
-    //ride_line(pid_k, speed, robot, &both_err, &stop_cross_white);
+    ride_line(pid_k, speed, robot, &both_err, &stop_cross_white);
     ride_line(pid_k, speed, robot, &both_err, &stop_cross);
     //ride_line(pid_k, speed, robot, &both_err, &stop_cross_white);
 }
@@ -597,7 +597,7 @@ pub fn ride_outer_line_left_stop(
     fn ride_right(l: i32, r: i32) -> i32{
         r - middle_grey()
     }
-    //ride_line(pid_k, speed, robot, &ride_right, &stop_left_white);
+    ride_line(pid_k, speed, robot, &ride_right, &stop_left_white);
     ride_line(pid_k, speed, robot, &ride_right, &stop_left);
     //ride_line(pid_k, speed, robot, &ride_right, &stop_left_white);
 }

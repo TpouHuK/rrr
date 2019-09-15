@@ -45,10 +45,8 @@ pub fn load_json(file_name: &str) -> (petgraph::Graph<Point, Edge, petgraph::Und
     let json_file_path = Path::new(file_name);
     let json_file = File::open(json_file_path).unwrap();
 
-    println!("Desearialization started");
     let deserialized_data: serde_json::Value =
         serde_json::from_reader(json_file).unwrap();
-    println!("Desearialization ended");
 
 
     // Points deserialization

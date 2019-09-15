@@ -107,7 +107,6 @@ fn main() {
     let mut cs = line::ControlSensor::new();
 
 
-    println!("Stuff inited");
     let goto_point_thread = thread::spawn(move|| {
         let mut robot = line::RobotMoveBase::new();
         let (mutex, condvar) = &*is_goto_running_c;
@@ -120,6 +119,7 @@ fn main() {
 
             match moveact {
                 TypeOfMove::GotoPoint(path) => {
+            // GOTO POINT ROUTINE HERE
             let mut pidb;
             let mut pid;
             let mut lspeed;
@@ -283,7 +283,6 @@ fn main() {
                         t_run.send(());
                         thread::sleep(time::Duration::from_millis(10));
                     }
-                    println!("Testing");
                     //end
                 },
             }
@@ -295,11 +294,9 @@ fn main() {
     });
 
 
-    println!("Near graph");
     //let loaded_graph = Arc::new(Mutex::new(graph::load_json("points.json")));
     let loaded_graph = Arc::new(graph::load_json("points.json"));
     let loaded_graph2 = loaded_graph.clone();
-    println!("After graph");
     let lua = Lua::new();
     let mut lift_motor = line::Lift::new();
     let mut rotate_motor = line::Rotate::new();
@@ -309,7 +306,6 @@ fn main() {
     lua.set_hook(hook_triggers, lua_hook);
     
     let script = get_script();
-    println!("Befored context");
     lua.context(move |lua_ctx|{
         let set_lspeed = move |_c, ispeed: i32|{
             let mutex = &*klspeed_c;
