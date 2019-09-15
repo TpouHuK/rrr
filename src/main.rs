@@ -323,8 +323,8 @@ fn main() {
             *degrees = idegrees;
             Ok(())
         };
-        let lua_sleep = |_c, secs: u64|{
-            thread::sleep(time::Duration::from_millis(secs));
+        let lua_sleep = |_c, millis: u64|{
+            thread::sleep(time::Duration::from_millis(millis));
             Ok(())
         };
 

@@ -322,14 +322,14 @@ function put_router(color, side)
 end
 
 function set_defaults()
-	r_set_pid(0.5, 0, 10.0)
-	r_set_pidb(0.5, 0, 10.0)
+	r_set_pid(0.6, 0, 10.0)
+	r_set_pidb(0.6, 0, 10.0)
 
 	r_set_lspeed(40)
 	r_set_ldegrees(80)
 
 	r_set_rspeed(30)
-	r_set_mspeed(20)
+	r_set_mspeed(30)
 
 	r_set_white(40)
 	r_set_middle_grey(35)
