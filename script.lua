@@ -331,7 +331,7 @@ function set_defaults()
 	r_set_pid(0.8, 0, 10.0)
 	r_set_pidb(0.8, 0, 10.0)
 
-	r_set_lspeed(20)
+	r_set_lspeed(50)
 	r_set_ldegrees(80)
 
 	r_set_rspeed(20)
