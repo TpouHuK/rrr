@@ -1,3 +1,4 @@
+dofile("values.lua")
 -- SERVICE FUNCTIONS
 -- === === === === === ===
 function sleep(secs)
@@ -52,7 +53,7 @@ end
 
 function black_white_cs()
 	h, s, v = r_get_cs_hsv()
-	if v > 40 then
+	if v > BLACK_WHITE_CS_LIMIT then
 		return 'white'
 	else
 		return 'black'
@@ -111,10 +112,10 @@ function start_line_ride()
 end
 
 function start_degrees_ride()
-	ride_degrees(320)
-	ride_degrees_steer(-100, 110)
-	ride_degrees(90)
-	ride_degrees_steer(100, 110)
+	ride_degrees(START_DEGREES_UP)
+	ride_degrees_steer(-100, START_DEGREES_LEFT)
+	ride_degrees(START_DEGREES_DIAG)
+	ride_degrees_steer(100, START_DEGREES_RIGHT)
 end
 
 function read_markers()
@@ -151,11 +152,12 @@ end
 
 function set_lift(where)
 	if where == "up" then degrees = 0
-	elseif where == "take_wire"   then degrees = 600
-	elseif where == "put_wire"    then degrees = 460
-	elseif where == "take_router"  then degrees = 400
-	elseif where == "shake_router" then degrees = 100
-	elseif where == "put_router"   then degrees = 500
+	elseif where == "take_wire"   then degrees = LIFT_TAKE_WIRE
+	elseif where == "put_wire"    then degrees = LIFT_PUT_WIRE
+	elseif where == "take_router"  then degrees = LIFT_TAKE_ROUTER
+	elseif where == "shake_router" then degrees = LIFT_SHAKE_ROUTER
+	elseif where == "put_router"   then degrees = LIFT_PUT_ROUTER
+	elseif where == "finish" then degrees = LIFT_FINISH
 	end
 
 	r_set_lift(-degrees)
@@ -171,14 +173,14 @@ function get_router(cub_n)
 	end
 
 	goto_point(gt)
-	r_set_rspeed(20)
+	r_set_rspeed(ROUTER_ROTATE_SPEED)
 	rotate_to_point(rt)
 	set_defaults()
 
 	set_rotate(0)
-	ride_degrees(100, -30)
+	ride_degrees(ROUTER_DEGREES, -ROUTER_BACK_SPEED)
 	set_lift("take_router")
-	ride_degrees(100, D_router_get_speed)
+	ride_degrees(ROUTER_DEGREES, ROUTER_GET_SPEED)
 	set_lift("up")
 end
 
@@ -190,17 +192,14 @@ end
 
 function shake()
 	-- do return end
-	local FORWARD_DEGREES = 50
-	local SIDES_DEGREES = 30
-	local SPEED = 20
 	--r_set_mspeed(60)
 	for i=1,1 do
-		ride_degrees_steer(0, FORWARD_DEGREES, SPEED)
-		ride_degrees_steer(0, FORWARD_DEGREES, -SPEED)
+		ride_degrees_steer(0, FORWARD_SHAKE_DEGREES, SHAKE_SPEED)
+		ride_degrees_steer(0, FORWARD_SHAKE_DEGREES, -SHAKE_SPEED)
 
-		ride_degrees_steer(-100, SIDES_DEGREES, SPEED)
-		ride_degrees_steer(-100, SIDES_DEGREES*2, -SPEED)
-		ride_degrees_steer(-100, SIDES_DEGREES, SPEED)
+		ride_degrees_steer(-100, SIDE_SHAKE_DEGREES, SHAKE_SPEED)
+		ride_degrees_steer(-100, SIDE_SHAKE_DEGREES*2, -SHAKE_SPEED)
+		ride_degrees_steer(-100, SIDE_SHAKE_DEGREES, SHAKE_SPEED)
 	end
 	--set_defaults()
 end
@@ -328,22 +327,21 @@ function put_router(color, side)
 end
 
 function set_defaults()
-	r_set_pid(0.8, 0, 10.0)
-	r_set_pidb(0.8, 0, 10.0)
+	r_set_pid(P_M, I_M, D_M)
+	r_set_pidb(P_S, I_S, D_S)
 
-	r_set_lspeed(50)
-	r_set_ldegrees(80)
+	r_set_lspeed(LINE_SPEED)
+	r_set_ldegrees(LINE_UDEGREES)
 
-	r_set_rspeed(20)
-	r_set_mspeed(30)
+	r_set_rspeed(ROTATE_SPEED)
+	r_set_mspeed(MACRO_SPEED)
 
-	r_set_white(45)
-	r_set_middle_grey(40)
-	r_set_black(20)
+	r_set_white(WHITE)
+	r_set_middle_grey(MIDLE_GREY)
+	r_set_black(BLACK)
 
 
-	D_ride_degrees_speed = 20
-	D_router_get_speed = 20
+	D_ride_degrees_speed = RIDE_DEGREES_SPEED
 end
 
 
@@ -356,17 +354,14 @@ function put_wire(num)
 		rotate_to_point("16")
 	end
 
-	local WIRE_DEGREES = 240
-	local WIRE_SPEED1 = 20
-	local WIRE_SPEED2 = 50
-	line_degrees(410)
-	ride_degrees(WIRE_DEGREES)
+	line_degrees(WIRE_PUT_LINE_DEGREES)
+	ride_degrees(WIRE_PUT_DEGREES)
 	set_lift("put_wire")
 	set_lift("up")
 	if num == 2 then
-		ride_degrees(410 + WIRE_DEGREES - 20, -WIRE_SPEED2) 
+		ride_degrees(WIRE_PUT_LINE_DEGREES + WIRE_PUT_DEGREES - WIRE_PUT_OVERSHOOT_COMP, -WIRE_PUT_SPEED_NOTHING) 
 	elseif num == 1 then
-		ride_degrees(410 + WIRE_DEGREES - 20, -WIRE_SPEED1) 
+		ride_degrees(WIRE_PUT_LINE_DEGREES + WIRE_PUT_DEGREES - WIRE_PUT_OVERSHOOT_COMP, -WIRE_PUT_SPEED_CUBICS) 
 	end
 end
 
@@ -379,11 +374,10 @@ function get_wire(wire_num)
 		rotate_to_point("43")
 	end
 
-	local GET_DEGREES = 250
-	line_degrees(GET_DEGREES)
+	line_degrees(WIRE_GET_DEGREES)
 	set_lift("take_wire")
 	set_lift("up")
-	ride_degrees(GET_DEGREES, -20) 
+	ride_degrees(WIRE_GET_DEGREES, -20) 
 end
 
 
@@ -428,8 +422,8 @@ end
 
 function finish()
 	goto_point(30)
-	set_lift("take_wire")
-	ride_degrees(300)
+	set_lift("finish")
+	ride_degrees(FINISH_DEGREES)
 	set_lift("up")
 end
 
