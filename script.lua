@@ -184,10 +184,11 @@ function get_router(cub_n)
 
 	set_rotate(0)
 	
-	ride_degrees(ROUTER_DEGREES, -ROUTER_BACK_SPEED)
+	ride_degrees(ROUTER_DEGREES_BACK, -ROUTER_BACK_SPEED)
 	set_lift("take_router")
-	line_degrees(ROUTER_DEGREES, ROUTER_GET_SPEED)
+	ride_degrees(ROUTER_DEGREES_BACK+ROUTER_DEGREES_FORWARD, ROUTER_GET_SPEED)
 	set_lift("up")
+	ride_degrees(ROUTER_DEGREES_FORWARD, -ROUTER_BACK_SPEED)
 end
 
 function pr_long(color)
