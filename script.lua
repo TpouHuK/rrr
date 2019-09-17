@@ -530,7 +530,7 @@ for _,v in ipairs{3,6,2,1,4,5} do
 		break
 	end
 end
-put_router("red", "long")
+put_router("red", "short")
 -- green 
 for _,v in ipairs{1,2,3,4,5,6} do
 	if routers[v] == "black" then
