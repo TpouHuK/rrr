@@ -6,9 +6,13 @@ function sleep(secs)
 end
 
 function goto_point(point)
-	--r_set_mspeed(20)
 	r_goto_point(point)
 	r_wait_till_arrival()
+end
+
+function s_goto_point(point)
+	r_set_lspeed(FAST_LINE_SPEED)
+	goto_point(point)
 	set_defaults()
 end
 
@@ -178,9 +182,10 @@ function get_router(cub_n)
 	set_defaults()
 
 	set_rotate(0)
+	
 	ride_degrees(ROUTER_DEGREES, -ROUTER_BACK_SPEED)
 	set_lift("take_router")
-	ride_degrees(ROUTER_DEGREES, ROUTER_GET_SPEED)
+	line_degrees(ROUTER_DEGREES, ROUTER_GET_SPEED)
 	set_lift("up")
 end
 
@@ -374,10 +379,10 @@ function get_wire(wire_num)
 		rotate_to_point("43")
 	end
 
-	line_degrees(WIRE_GET_DEGREES)
+	line_degrees(WIRE_GET_DEGREES, WIRE_GET_U_SPEED)
 	set_lift("take_wire")
 	set_lift("up")
-	ride_degrees(WIRE_GET_DEGREES, -20) 
+	ride_degrees(WIRE_GET_DEGREES, -WIRE_GET_D_SPEED) 
 end
 
 
@@ -422,8 +427,8 @@ end
 
 function finish()
 	goto_point(30)
-	set_lift("finish")
-	ride_degrees(FINISH_DEGREES)
+	-- set_lift("finish")
+	-- ride_degrees(FINISH_DEGREES)
 	set_lift("up")
 end
 
@@ -465,6 +470,7 @@ end
 set_defaults()
 
 start()
+s_goto_point("21")
 routers = {}
 for i=1, 6 do
 	routers[i] = "unknown"
@@ -481,7 +487,8 @@ for i=4,6 do
 	end
 end
 get_wire(2)
-
+goto_point("37")
+s_goto_point("34")
 put_router("yellow", "short")
 put_wire(2)
 get_wire(1)

@@ -365,6 +365,33 @@ impl MotorPair {
         }
     }
 
+    pub fn go_on_stop(&mut self, speed: i32, degrees: i32) {
+        let cl = self.lmotor.get_position().unwrap() as i32;
+        let cr = self.rmotor.get_position().unwrap() as i32;
+
+        let start_speed = (self.lmotor.get_speed().unwrap().abs() as i32
+                           +self.lmotor.get_speed().unwrap().abs() as i32) / 2;
+
+        self.set_steering(0, speed);
+
+        let target_stop = degrees*110/100;
+        loop {
+            let l_diff = ((self.lmotor.get_position().unwrap() as i32) - cl);
+            let r_diff = ((self.rmotor.get_position().unwrap() as i32) - cr);
+            if (l_diff.abs() > degrees) || (r_diff.abs() > degrees){
+                break;
+            }
+            let distance = (l_diff.abs() + r_diff.abs())/2;
+            fn max(a: i32, b: i32) -> i32{
+                if a > b {a} else {b}
+            }
+            let cur_speed = (start_speed*(degrees-distance)/degrees);
+            self.set_steering(0, max(cur_speed/10, 10));
+            // (curr_distance/full_degrees)*start_power+5
+            // thread::sleep(time::Duration::from_millis(10));
+        }
+    }
+
     pub fn steer_on_degrees(&mut self, steering: i32, 
                             speed: i32, degrees: i32) {
         let cl = self.lmotor.get_position().unwrap() as i32;

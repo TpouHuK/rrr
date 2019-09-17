@@ -130,8 +130,9 @@ fn main() {
             {lspeed = *klspeed.lock().unwrap()};
             {ldegrees = *kldegrees.lock().unwrap()};
             {rspeed = *krspeed.lock().unwrap()};
+            let mut is_centered = true;
 
-            for elem in path {
+            for (num, elem) in path.iter().enumerate() {
                 match elem {
                     graph::MoveAction::LineRide(lineride) => {
                         match lineride {
@@ -145,15 +146,24 @@ fn main() {
                                 line::ride_line_right_stop(pid, lspeed, &mut robot);
                             },
                         }
-                        robot.motor_pair.go_on_degrees(lspeed, ldegrees);
+                        is_centered = false;
                     },
                     graph::MoveAction::Rotate(count) => {
+                        if  !is_centered {
+                            robot.motor_pair.go_on_stop(lspeed, ldegrees);
+                            is_centered = true;
+                        }
                         robot.motor_pair.set_steering(0, 0);
                         thread::sleep(time::Duration::from_millis(100));
-                        line::turn_count(&mut robot, count, rspeed);
+                        line::turn_count(&mut robot, *count, rspeed);
                     }
                 }
             }
+            if  !is_centered {
+                robot.motor_pair.go_on_stop(lspeed, ldegrees);
+                is_centered = true;
+            }
+
             robot.motor_pair.set_steering(0, 0);
             },
                 TypeOfMove::LineDegrees(degrees) => {
