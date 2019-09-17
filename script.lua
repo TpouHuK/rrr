@@ -162,6 +162,7 @@ function set_lift(where)
 	elseif where == "shake_router" then degrees = LIFT_SHAKE_ROUTER
 	elseif where == "put_router"   then degrees = LIFT_PUT_ROUTER
 	elseif where == "finish" then degrees = LIFT_FINISH
+	elseif where == "pre_put" then degrees = LIFT_PRE_PUT
 	end
 
 	r_set_lift(-degrees)
