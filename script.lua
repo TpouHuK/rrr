@@ -233,7 +233,7 @@ function put_router(color, side)
 
 	goto_point(gt)
 	rotate_to_point(rt)
-	set_lift("up")
+	set_lift("pre_put")
 	set_rotate(0)
 
 	local DEGREES
