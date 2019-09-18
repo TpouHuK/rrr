@@ -386,7 +386,7 @@ impl MotorPair {
                 if a > b {a} else {b}
             }
             let cur_speed = (start_speed*(degrees-distance)/degrees);
-            self.set_steering(0, max(cur_speed/10, 10));
+            self.set_steering(0, max(cur_speed/10, 20));
             // (curr_distance/full_degrees)*start_power+5
             // thread::sleep(time::Duration::from_millis(10));
         }

@@ -489,6 +489,12 @@ goto_point("37")
 s_goto_point("34")
 put_router("yellow", "short")
 put_wire(2)
+if MAGIC_ON then
+	r_set_ldegrees(MAGIC_DSC)
+	goto_point("11")
+	set_defaults()
+end
+
 get_wire(1)
 
 routers[1] = check_router(1)
@@ -526,7 +532,22 @@ for _,v in ipairs{3,6,2,1,4,5} do
 		break
 	end
 end
-put_router("red", "short")
+
+local white_first_row_count = 0
+for _,v in ipairs{1,2,3} do
+	if routers[v] == "white" then
+		white_first_row_count = white_first_row_count + 1
+	end
+end
+
+
+if white_first_row_count == 2 then
+	put_router("red", "short")
+else
+	put_router("red", "long")
+end
+
+
 -- green 
 for _,v in ipairs{1,2,3,4,5,6} do
 	if routers[v] == "black" then
