@@ -400,12 +400,12 @@ impl MotorPair {
         self.set_pid_steering(steering, speed);
 
         // eprintln!("DEGREES: {}", degrees);
-        while {
+        loop {
             let l_diff = ((self.lmotor.get_position().unwrap() as i32) - cl);
             let r_diff = ((self.rmotor.get_position().unwrap() as i32) - cr);
-            (l_diff.abs() < degrees) && (r_diff.abs() < degrees)
-        }{
-            // thread::sleep(time::Duration::from_millis(10));
+            //(l_diff.abs() < degrees) && (r_diff.abs() < degrees)
+            let avg = (l_diff.abs() + r_diff.abs())/2;
+            if avg > degrees { break; }
         }
         self.set_pid_steering(0, 0);
     }

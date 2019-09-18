@@ -253,24 +253,22 @@ function put_router(color, side)
 
 	local SLEEP_TIME = 0.5
 	if where == 0 then
-		DEGREES = 160
 		set_rotate(0)
-		line_degrees(DEGREES) -- forward
+		line_degrees(ROUTER_0) -- forward
 
 		sleep(SLEEP_TIME)
 		set_lift("shake_router")
 		shake()
 		set_lift("put_router")
 
-		ride_degrees(DEGREES, -20) -- return
+		ride_degrees(ROUTER_0, -20) -- return
 		set_lift("up")
 
 	elseif where == 1 then
-		DEGREES = 130
 		set_rotate(1)
-		line_degrees(DEGREES) -- forward
+		line_degrees(ROUTER_1) -- forward
 
-		ride_degrees_steer(-20, 50) -- steering right
+		ride_degrees_steer(-20, ROUTER_1S) -- steering right
 
 		sleep(SLEEP_TIME)
 		set_lift("shake_router")
@@ -280,18 +278,17 @@ function put_router(color, side)
 		set_rotate(3)
 		set_lift("up")
 
-		ride_degrees_steer(-20, 50, -20) -- steering back right
-		ride_degrees(DEGREES, -20) 
+		ride_degrees_steer(-20, ROUTER_1S, -20) -- steering back right
+		ride_degrees(ROUTER_1, -20) 
 
 		set_lift("up")
 		set_rotate(0)
 
 	elseif where == 3 then
-		DEGREES = 130
 		set_rotate(3)
-		line_degrees(DEGREES) -- forward
+		line_degrees(ROUTER_3) -- forward
 
-		ride_degrees_steer(20, 50) -- steering right
+		ride_degrees_steer(20, ROUTER_3S) -- steering right
 
 		sleep(SLEEP_TIME)
 		set_lift("shake_router")
@@ -301,16 +298,15 @@ function put_router(color, side)
 		set_rotate(1)
 		set_lift("up")
 
-		ride_degrees_steer(20, 50, -20) -- steering back right
-		ride_degrees(DEGREES, -20) 
+		ride_degrees_steer(20, ROUTER_3S, -20) -- steering back right
+		ride_degrees(ROUTER_3, -20) 
 
 		set_lift("up")
 		set_rotate(0)
 
 	elseif where == 2 then
-		DEGREES = 180
 		set_rotate(2) 
-		line_degrees(DEGREES) -- forward
+		line_degrees(ROUTER_2) -- forward
 
 		sleep(SLEEP_TIME)
 		set_lift("shake_router")
@@ -319,7 +315,7 @@ function put_router(color, side)
 
 		set_rotate(0)
 		set_lift("up")
-		ride_degrees(DEGREES, -20) -- return
+		ride_degrees(ROUTER_2, -20) -- return
 	end
 	set_defaults()
 
@@ -361,8 +357,8 @@ function put_wire(num)
 		rotate_to_point("16")
 	end
 
-	line_degrees(WIRE_PUT_LINE_DEGREES)
-	ride_degrees(WIRE_PUT_DEGREES)
+	line_degrees(WIRE_PUT_LINE_DEGREES, WIRE_PUT_SPEED_F)
+	ride_degrees(WIRE_PUT_DEGREES, WIRE_PUT_SPEED_F)
 	set_lift("put_wire")
 	set_lift("up")
 	if num == 2 then
