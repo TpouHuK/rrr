@@ -180,6 +180,11 @@ function get_router(cub_n)
 	goto_point(gt)
 	r_set_rspeed(ROUTER_ROTATE_SPEED)
 	rotate_to_point(rt)
+	if MAGIC_ON then
+		if (cub_n == 1) or (cub_n == 2) or (cub_n == 3) then
+			ride_degrees_steer(-100, MAGIC_RGR, ROUTER_ROTATE_SPEED)
+		end
+	end
 	set_defaults()
 
 	set_rotate(0)
@@ -212,7 +217,6 @@ function shake()
 end
 
 function put_router(color, side)
-	local PUT_ROUTER_SPEED = 20
 	if side == "long" then 
 		if     color == "red"    then gt = "6";  rt = "22"; rp = 1;
 		elseif color == "blue"   then gt = "8";  rt = "24"; rp = 1;
@@ -236,9 +240,6 @@ function put_router(color, side)
 	rotate_to_point(rt)
 	set_lift("pre_put")
 	set_rotate(0)
-
-	local DEGREES
-	local LONG_DEGREES = 250
 
 	r_set_lspeed(PUT_ROUTER_SPEED)
 	r_set_mspeed(PUT_ROUTER_SPEED)
@@ -268,7 +269,7 @@ function put_router(color, side)
 		set_rotate(1)
 		line_degrees(ROUTER_1) -- forward
 
-		ride_degrees_steer(-20, ROUTER_1S) -- steering right
+		--ride_degrees_steer(-20, ROUTER_1S) -- steering right
 
 		sleep(SLEEP_TIME)
 		set_lift("shake_router")
@@ -278,7 +279,7 @@ function put_router(color, side)
 		set_rotate(3)
 		set_lift("up")
 
-		ride_degrees_steer(-20, ROUTER_1S, -20) -- steering back right
+		--ride_degrees_steer(-20, ROUTER_1S, -20) -- steering back right
 		ride_degrees(ROUTER_1, -20) 
 
 		set_lift("up")
@@ -288,7 +289,7 @@ function put_router(color, side)
 		set_rotate(3)
 		line_degrees(ROUTER_3) -- forward
 
-		ride_degrees_steer(20, ROUTER_3S) -- steering right
+		--ride_degrees_steer(20, ROUTER_3S) -- steering right
 
 		sleep(SLEEP_TIME)
 		set_lift("shake_router")
@@ -298,7 +299,7 @@ function put_router(color, side)
 		set_rotate(1)
 		set_lift("up")
 
-		ride_degrees_steer(20, ROUTER_3S, -20) -- steering back right
+		--ride_degrees_steer(20, ROUTER_3S, -20) -- steering back right
 		ride_degrees(ROUTER_3, -20) 
 
 		set_lift("up")
@@ -321,7 +322,7 @@ function put_router(color, side)
 
 	if side == "long" then
 		-- longride
-		ride_degrees(LONG_DEGREES-20, -20) -- return
+		ride_degrees(LONG_DEGREES - BACK_LONG_NOTRIDE, -20) -- return
 		
 	elseif side == "short" then
 		-- nothing
@@ -424,7 +425,9 @@ function start()
 end
 
 function finish()
-	goto_point(30)
+	goto_point("11")
+	s_goto_point("32")
+	goto_point("30")
 	-- set_lift("finish")
 	-- ride_degrees(FINISH_DEGREES)
 	set_lift("up")
@@ -499,6 +502,8 @@ if MAGIC_ON then
 	goto_point("11")
 	set_defaults()
 end
+goto_point("11")
+s_goto_point("21")
 
 get_wire(1)
 
