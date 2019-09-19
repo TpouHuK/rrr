@@ -467,6 +467,10 @@ end
 -- === === === === === ===
 set_defaults()
 
+-- set_current_pos("7", 0)
+-- goto_point("6")
+-- sleep(777)
+
 start()
 s_goto_point("21")
 routers = {}
@@ -484,6 +488,7 @@ for i=4,6 do
 		is_router_taken = true
 	end
 end
+
 get_wire(2)
 goto_point("37")
 s_goto_point("34")
