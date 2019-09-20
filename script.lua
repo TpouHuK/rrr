@@ -109,9 +109,11 @@ end
 -- MAIN FUNCTIONS 
 -- === === === === === ===
 function start_line_ride()
+	r_set_lspeed(FIRST_LINE_SPEED)
 	r_rolls()
 	read_markers()
 	r_wait_till_arrival()
+	set_defaults()
 	ride_degrees(100)
 end
 
@@ -361,6 +363,7 @@ function put_wire(num)
 	line_degrees(WIRE_PUT_LINE_DEGREES, WIRE_PUT_SPEED_F)
 	ride_degrees(WIRE_PUT_DEGREES, WIRE_PUT_SPEED_F)
 	set_lift("put_wire")
+	sleep(WIRE_PUT_SLEEP)
 	set_lift("up")
 	if num == 2 then
 		ride_degrees(WIRE_PUT_LINE_DEGREES + WIRE_PUT_DEGREES - WIRE_PUT_OVERSHOOT_COMP, -WIRE_PUT_SPEED_NOTHING) 
