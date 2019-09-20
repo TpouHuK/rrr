@@ -254,7 +254,7 @@ function put_router(color, side)
 	end
 
 
-	local SLEEP_TIME = 0.5
+	local SLEEP_TIME = ROUTER_SLEEP_TIME
 	if where == 0 then
 		set_rotate(0)
 		line_degrees(ROUTER_0) -- forward
@@ -383,6 +383,7 @@ function get_wire(wire_num)
 
 	line_degrees(WIRE_GET_DEGREES, WIRE_GET_U_SPEED)
 	set_lift("take_wire")
+	sleep(WIRE_GET_SLEEP)
 	set_lift("up")
 	ride_degrees(WIRE_GET_DEGREES, -WIRE_GET_D_SPEED) 
 end

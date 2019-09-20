@@ -14,7 +14,7 @@ P_S = 0.4
 I_S = 0 
 D_S = 8
 
-FIRST_LINE_SPEED = 60                           --кубики
+FIRST_LINE_SPEED = 100                           --кубики
 
 FAST_LINE_SPEED = 80
 LINE_SPEED = 40 + 5
@@ -29,6 +29,7 @@ MIDLE_GREY = 35
 BLACK = 20
 
 -- Router put
+ROUTER_SLEEP_TIME = 0
 LONG_DEGREES = 250
 BACK_LONG_NOTRIDE = 10
 ROUTER_0 = 160 - 10
@@ -60,7 +61,7 @@ WIRE_PUT_SLEEP = 0.8
 WIRE_GET_DEGREES = 265 - 3                       --
 WIRE_GET_U_SPEED = 25                            --
 WIRE_GET_D_SPEED = 55                            --
-WIRE_GET_SLEEP = 0.4
+WIRE_GET_SLEEP = 0.8
 -- Shake
 SHAKE_SPEED = 10 + 5
 FORWARD_SHAKE_DEGREES = 50 - 10
@@ -70,8 +71,8 @@ SIDE_SHAKE_DEGREES = 30 - 10
 FINISH_DEGREES = 300
 
 -- Lift setup
-LIFT_TAKE_WIRE    = 600 + 40 - 10
-LIFT_PUT_WIRE     = 460 + 10
+LIFT_TAKE_WIRE    = 600 + 40
+LIFT_PUT_WIRE     = 460 + 15
 LIFT_TAKE_ROUTER  = 400 + 40 + 10 + 10
 LIFT_SHAKE_ROUTER = 100 + 40
 LIFT_PUT_ROUTER   = 500 + 40
