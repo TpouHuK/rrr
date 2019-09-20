@@ -69,9 +69,9 @@ impl Lift {
         }
     }
 
-    pub fn set_point(&mut self, point:i32) {
+    pub fn set_point(&mut self, point:i32, speed:i32) {
         self.motor.set_position_sp(point as isize).unwrap();
-        self.motor.set_speed_sp(750).unwrap();
+        self.motor.set_speed_sp((speed*15) as isize).unwrap();
         self.motor.run_to_abs_pos(None).unwrap();
         while self.motor.is_running().unwrap() {
             thread::sleep(time::Duration::from_millis(10));
@@ -93,7 +93,7 @@ impl Rotate {
         }
     }
 
-    pub fn set_point(&mut self, point:i32) {
+    pub fn set_point(&mut self, point:i32, speed: i32) {
         let mut cur_pos = (self.pos % 360);
         if cur_pos < 0 { cur_pos = cur_pos + 360 }
         let diff = point - cur_pos;
@@ -109,7 +109,7 @@ impl Rotate {
 
         self.motor.set_position_sp((self.pos + target) as isize).unwrap();
         self.pos += target;
-        self.motor.set_speed_sp(250).unwrap();
+        self.motor.set_speed_sp((speed*15) as isize).unwrap();
         self.motor.run_to_abs_pos(None).unwrap();
         while self.motor.is_running().unwrap() {
             thread::sleep(time::Duration::from_millis(10));

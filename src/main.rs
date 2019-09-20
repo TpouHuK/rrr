@@ -452,13 +452,13 @@ fn main() {
             return Ok((h, s, v))
         };
 
-        let set_lift = move |_c: Context, sp: i32| {
-            lift_motor.set_point(sp);
+        let set_lift = move |_c: Context, (sp, speed): (i32, i32)| {
+            lift_motor.set_point(sp, speed);
             Ok(())
         };
         
-        let set_rotate= move |_c: Context, sp: i32| {
-            rotate_motor.set_point(sp);
+        let set_rotate= move |_c: Context, (sp, speed): (i32, i32)| {
+            rotate_motor.set_point(sp, speed);
             Ok(())
         };
 

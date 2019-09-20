@@ -15,8 +15,8 @@ I_S = 0
 D_S = 8
 
 FAST_LINE_SPEED = 80
-LINE_SPEED = 40
-LINE_UDEGREES = 90
+LINE_SPEED = 40 + 5
+LINE_UDEGREES = 90 - 5
 RIDE_DEGREES_SPEED = 20
 
 ROTATE_SPEED = 30
@@ -38,28 +38,28 @@ ROUTER_3 = ROUTER_1
 ROUTER_3S = ROUTER_1S
 
 -- Router
-ROUTER_GET_SPEED = 25 --поворот к роутору
-ROUTER_BACK_SPEED = 25
-ROUTER_ROTATE_SPEED = 20
+ROUTER_GET_SPEED = 25                            --подъезд
+ROUTER_BACK_SPEED = 25 + 5                       --отъезд
+ROUTER_ROTATE_SPEED = 20                         --поворот к роутору
 ROUTER_DEGREES_BACK = 100
 ROUTER_DEGREES_FORWARD = 50
 PUT_ROUTER_SPEED = 30
 
 -- Wire put
-WIRE_PUT_DEGREES = 220 + 10
-WIRE_PUT_LINE_DEGREES = 410
-WIRE_PUT_SPEED_CUBICS = 20
-WIRE_PUT_SPEED_NOTHING = 50 + 10
-WIRE_PUT_OVERSHOOT_COMP = -15
-WIRE_PUT_SPEED_F = 30
+WIRE_PUT_DEGREES = 220 + 10                      --
+WIRE_PUT_LINE_DEGREES = 410                      --
+WIRE_PUT_SPEED_CUBICS = 20                       --
+WIRE_PUT_SPEED_NOTHING = 50 + 10                 --
+WIRE_PUT_OVERSHOOT_COMP = -15                    --
+WIRE_PUT_SPEED_F = 30                            --подъезд кабеля ложь
 
 
-WIRE_GET_DEGREES = 265 - 3
-WIRE_GET_U_SPEED = 25
-WIRE_GET_D_SPEED = 50
+WIRE_GET_DEGREES = 265 - 3                       --
+WIRE_GET_U_SPEED = 25                            --
+WIRE_GET_D_SPEED = 55                            --
 
 -- Shake
-SHAKE_SPEED = 10
+SHAKE_SPEED = 10 + 5
 FORWARD_SHAKE_DEGREES = 50 - 10
 SIDE_SHAKE_DEGREES = 30 - 10
 
@@ -75,6 +75,8 @@ LIFT_PUT_ROUTER   = 500 + 40
 LIFT_FINISH       = 500
 LIFT_PRE_PUT      = 120 - 15
 
+LIFT_SPEED = 30 + 30                             -- скорость поднималки
+ROTATE_LIFT_SPEED = 20                           -- скорость вращалки
 -- Start
 START_DEGREES_UP = 320
 START_DEGREES_LEFT = 110

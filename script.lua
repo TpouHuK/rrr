@@ -33,7 +33,7 @@ function line_degrees(degrees, speed)
 end
 
 function set_rotate(pos)
-	r_set_rotate(pos * -90)
+	r_set_rotate(pos * -90, ROTATE_LIFT_SPEED)
 end
 
 function ride_degrees(degrees, speed)
@@ -165,7 +165,7 @@ function set_lift(where)
 	elseif where == "pre_put" then degrees = LIFT_PRE_PUT
 	end
 
-	r_set_lift(-degrees)
+	r_set_lift(-degrees, LIFT_SPEED)
 end
 
 function get_router(cub_n)
