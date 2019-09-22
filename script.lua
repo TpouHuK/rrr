@@ -170,6 +170,26 @@ function set_lift(where)
 	r_set_lift(-degrees, LIFT_SPEED)
 end
 
+function shake_lift()
+	local up = LIFT_PUT_WIRE + WIRE_SHAKE
+	local down = LIFT_PUT_WIRE - WIRE_SHAKE
+	for i = 1, 3 do
+		r_set_lift(-up, LIFT_SPEED)
+		r_set_lift(-down, LIFT_SPEED)
+	end
+	set_lift("put_wire")
+end
+
+function shake_lift_get()
+	local up = LIFT_TAKE_WIRE + WIRE_SHAKE
+	local down = LIFT_TAKE_WIRE - WIRE_SHAKE
+	for i = 1, 3 do
+		r_set_lift(-up, LIFT_SPEED)
+		r_set_lift(-down, LIFT_SPEED)
+	end
+	set_lift("take_wire")
+end
+
 function get_router(cub_n)
 	if     cub_n == 1 then gt = "6"; rt = "58";
 	elseif cub_n == 2 then gt = "7"; rt = "57";
@@ -178,12 +198,20 @@ function get_router(cub_n)
 	elseif cub_n == 5 then gt = "2"; rt = "41";
 	elseif cub_n == 6 then gt = "3"; rt = "42";
 	end
+	if (CUR_ANG == 90) and (CUR_POINT == "8")then
+		blue_magic = true
+	end
 
 	goto_point(gt)
 	r_set_rspeed(ROUTER_ROTATE_SPEED)
 	rotate_to_point(rt)
 	if MAGIC_ON then
-		if (cub_n == 1) or (cub_n == 2) or (cub_n == 3) then
+		if cub_n == 3 then
+			if blue_magic then
+				ride_degrees_steer(-100, MAGIC_RGR, ROUTER_ROTATE_SPEED)
+			end
+		end
+		if (cub_n == 1) or (cub_n == 2) then -- or (cub_n == 3) then
 			ride_degrees_steer(-100, MAGIC_RGR, ROUTER_ROTATE_SPEED)
 		end
 	end
@@ -207,6 +235,8 @@ end
 function shake()
 	-- do return end
 	--r_set_mspeed(60)
+
+	set_lift("shake_router")
 	for i=1,1 do
 		ride_degrees_steer(0, FORWARD_SHAKE_DEGREES, SHAKE_SPEED)
 		ride_degrees_steer(0, FORWARD_SHAKE_DEGREES, -SHAKE_SPEED)
@@ -214,6 +244,10 @@ function shake()
 		ride_degrees_steer(-100, SIDE_SHAKE_DEGREES, SHAKE_SPEED)
 		ride_degrees_steer(-100, SIDE_SHAKE_DEGREES*2, -SHAKE_SPEED)
 		ride_degrees_steer(-100, SIDE_SHAKE_DEGREES, SHAKE_SPEED)
+	end
+	for i =1, 3 do
+		r_set_lift(-LIFT_SHAKE_ROUTER+SHAKE_ROUTER_LIFT_DELTA, LIFT_SPEED)
+		r_set_lift(-LIFT_SHAKE_ROUTER-SHAKE_ROUTER_LIFT_DELTA, LIFT_SPEED)
 	end
 	--set_defaults()
 end
@@ -363,6 +397,7 @@ function put_wire(num)
 	line_degrees(WIRE_PUT_LINE_DEGREES, WIRE_PUT_SPEED_F)
 	ride_degrees(WIRE_PUT_DEGREES, WIRE_PUT_SPEED_F)
 	set_lift("put_wire")
+	shake_lift()
 	sleep(WIRE_PUT_SLEEP)
 	set_lift("up")
 	if num == 2 then
@@ -383,6 +418,7 @@ function get_wire(wire_num)
 
 	line_degrees(WIRE_GET_DEGREES, WIRE_GET_U_SPEED)
 	set_lift("take_wire")
+	shake_lift_get()
 	sleep(WIRE_GET_SLEEP)
 	set_lift("up")
 	ride_degrees(WIRE_GET_DEGREES, -WIRE_GET_D_SPEED) 
@@ -429,12 +465,14 @@ function start()
 end
 
 function finish()
-	goto_point("11")
-	s_goto_point("32")
-	goto_point("30")
-	-- set_lift("finish")
-	-- ride_degrees(FINISH_DEGREES)
-	set_lift("up")
+	goto_point("12")
+	s_goto_point("14")
+	goto_point("32")
+	rotate_to_point(33)
+	set_lift("finish")
+	ride_degrees_steer(100, FINISH_DEGREES_ROTATE)
+	ride_degrees(FINISH_DEGREES, -100)
+	--set_lift("up")
 end
 
 function testline()
@@ -447,10 +485,6 @@ function testline()
 end
 
 function fulltest_run()
-	get_wire(1)
-	put_wire(2)
-	put_wire(1)
-	---[[ 
 	get_router(1)
 	put_router("red", "long")
 	get_router(2)
@@ -459,6 +493,7 @@ function fulltest_run()
 	put_router("green", "short")
 	get_router(3)
 	put_router("yellow", "short")
+	sleep(999)
 end
 
 function print_routers()
@@ -474,9 +509,21 @@ end
 -- === === === === === ===
 set_defaults()
 
--- set_current_pos("7", 0)
--- goto_point("6")
--- sleep(777)
+-- ==TESTING ZONE== --
+--set_current_pos("8", 0)
+--get_router(1)
+--put_router("red", "long")
+--sleep(999)
+
+--set_current_pos("21", 0)
+--fake_read()
+--fulltest_run()
+-- ==TESTING ZONE== --
+
+for i=1, 20 do
+	print("REEEEEEEEEEEEEEEEEEEEEEEEadddy")
+end
+r_wait_center()
 
 start()
 s_goto_point("21")

@@ -502,6 +502,13 @@ fn main() {
             Ok(())
         };
 
+        let wait_center = |_c: Context, _:()| {
+            use std::io;
+            let mut input = String::new();
+            io::stdin().read_line(&mut input).unwrap();
+            Ok(())
+        };
+
         macro_rules! create_lua_func {
             ($lua_ctx:ident, $rust_func:expr, $lua_name:expr) => {
                 $lua_ctx.globals().set($lua_name, 
@@ -509,6 +516,7 @@ fn main() {
                 ).expect("Function to var in lua failed");
             }
         }
+        create_lua_func!(lua_ctx, wait_center, "r_wait_center");
 
         create_lua_func!(lua_ctx, set_middle_grey, "r_set_middle_grey");
         create_lua_func!(lua_ctx, set_black, "r_set_black");
