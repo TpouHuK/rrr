@@ -111,7 +111,8 @@ end
 function start_line_ride()
 	r_set_lspeed(FIRST_LINE_SPEED)
 	r_rolls()
-	read_markers()
+	--read_markers()
+	fake_read()
 	r_wait_till_arrival()
 	set_defaults()
 	ride_degrees(100)
@@ -211,7 +212,7 @@ function get_router(cub_n)
 				ride_degrees_steer(-100, MAGIC_RGR, ROUTER_ROTATE_SPEED)
 			end
 		end
-		if (cub_n == 1) or (cub_n == 2) then -- or (cub_n == 3) then
+		if (cub_n == 1) then -- or (cub_n == 2) then -- or (cub_n == 3) then
 			ride_degrees_steer(-100, MAGIC_RGR, ROUTER_ROTATE_SPEED)
 		end
 	end
@@ -543,11 +544,11 @@ for i=4,6 do
 	end
 end
 
-get_wire(2)
+--get_wire(2)
 goto_point("37")
 s_goto_point("34")
 put_router("yellow", "short")
-put_wire(2)
+--put_wire(2)
 if MAGIC_ON then
 	r_set_ldegrees(MAGIC_DSC)
 	goto_point("11")
@@ -556,11 +557,11 @@ end
 goto_point("11")
 s_goto_point("21")
 
-get_wire(1)
+--get_wire(1)
 
 routers[1] = check_router(1)
 routers[2] = check_router(2)
-put_wire(1)
+--put_wire(1)
 
 white_count = 0
 for _, v in ipairs(routers) do
