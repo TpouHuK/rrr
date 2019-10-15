@@ -398,7 +398,6 @@ function put_wire(num)
 	line_degrees(WIRE_PUT_LINE_DEGREES, WIRE_PUT_SPEED_F)
 	ride_degrees(WIRE_PUT_DEGREES, WIRE_PUT_SPEED_F)
 	set_lift("put_wire")
-	-- shake_lift()
 	set_lift("up")
 	if num == 2 then
 		ride_degrees(WIRE_PUT_LINE_DEGREES + WIRE_PUT_DEGREES - WIRE_PUT_OVERSHOOT_COMP, -WIRE_PUT_SPEED_NOTHING) 
@@ -418,8 +417,7 @@ function get_wire(wire_num)
 
 	line_degrees(WIRE_GET_DEGREES, WIRE_GET_U_SPEED)
 	set_lift("take_wire")
-	-- shake_lift_get()
-	-- sleep(WIRE_GET_SLEEP)
+	sleep(WIRE_GET_SLEEP)
 	set_lift("up")
 	ride_degrees(WIRE_GET_DEGREES, -WIRE_GET_D_SPEED) 
 end
@@ -506,38 +504,15 @@ function print_routers()
 		routers[6]
 	)
 end
--- === === === === === ===
+
 set_defaults()
-
--- ==TESTING ZONE== --
---set_current_pos("8", 0)
---get_router(1)
---put_router("red", "long")
---sleep(999)
-
---set_current_pos("21", 0)
---fake_read()
---fulltest_run()
--- ==TESTING ZONE== --
 
 for i=1, 20 do
 	print("REEEEEEEEEEEEEEEEEEEEEEEEadddy")
 end
 r_wait_center()
 
--- fake_read()
---set_current_pos("8", 0)
---get_router(1)
---put_router("red", "long")
---sleep(999)
-
-
 start()
--- get_wire(1)
--- put_wire(1)
--- get_wire(2)
--- put_wire(2)
--- sleep(888)
 
 
 s_goto_point("21")
@@ -590,6 +565,8 @@ else
 end
 
 print_routers()
+
+
 -- blue
 for _,v in ipairs{2,3,1,4,5,6} do
 	if routers[v] == "black" then
@@ -599,6 +576,8 @@ for _,v in ipairs{2,3,1,4,5,6} do
 	end
 end
 put_router("blue", "long")
+
+
 -- red 
 for _,v in ipairs{3,6,2,1,4,5} do
 	if routers[v] == "black" then
