@@ -167,7 +167,8 @@ function set_lift(where)
 	elseif where == "finish" then degrees = LIFT_FINISH
 	elseif where == "pre_put" then degrees = LIFT_PRE_PUT
 	end
-
+	-- TODO FIXME
+	if where == "shake_router" then return end
 	r_set_lift(-degrees, LIFT_SPEED)
 end
 
@@ -294,11 +295,11 @@ function put_router(color, side)
 		set_rotate(0)
 		line_degrees(ROUTER_0) -- forward
 
-		sleep(SLEEP_TIME)
+		
 		set_lift("shake_router")
 		shake()
 		set_lift("put_router")
-
+		sleep(SLEEP_TIME)
 		ride_degrees(ROUTER_0, -20) -- return
 		set_lift("up")
 
@@ -308,10 +309,11 @@ function put_router(color, side)
 
 		--ride_degrees_steer(-20, ROUTER_1S) -- steering right
 
-		sleep(SLEEP_TIME)
+		
 		set_lift("shake_router")
 		shake()
 		set_lift("put_router")
+		sleep(SLEEP_TIME)
 		set_rotate(0)
 		set_rotate(3)
 		set_lift("up")
@@ -328,10 +330,11 @@ function put_router(color, side)
 
 		--ride_degrees_steer(20, ROUTER_3S) -- steering right
 
-		sleep(SLEEP_TIME)
+		
 		set_lift("shake_router")
 		shake()
 		set_lift("put_router")
+		sleep(SLEEP_TIME)
 		set_rotate(0)
 		set_rotate(1)
 		set_lift("up")
@@ -346,11 +349,11 @@ function put_router(color, side)
 		set_rotate(2) 
 		line_degrees(ROUTER_2) -- forward
 
-		sleep(SLEEP_TIME)
 		set_lift("shake_router")
 		shake()
 		set_lift("put_router")
 
+		sleep(SLEEP_TIME)
 		set_rotate(0)
 		set_lift("up")
 		ride_degrees(ROUTER_2, -20) -- return
@@ -611,4 +614,4 @@ for _,v in ipairs{1,2,3,4,5,6} do
 	end
 end
 put_router("green", "short")
-finish()
+-- finish()
