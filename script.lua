@@ -234,7 +234,7 @@ function pr_short(color)
 end
 
 function shake()
-	-- do return end
+	do return end
 	--r_set_mspeed(60)
 
 	set_lift("shake_router")
@@ -398,8 +398,7 @@ function put_wire(num)
 	line_degrees(WIRE_PUT_LINE_DEGREES, WIRE_PUT_SPEED_F)
 	ride_degrees(WIRE_PUT_DEGREES, WIRE_PUT_SPEED_F)
 	set_lift("put_wire")
-	shake_lift()
-	sleep(WIRE_PUT_SLEEP)
+	-- shake_lift()
 	set_lift("up")
 	if num == 2 then
 		ride_degrees(WIRE_PUT_LINE_DEGREES + WIRE_PUT_DEGREES - WIRE_PUT_OVERSHOOT_COMP, -WIRE_PUT_SPEED_NOTHING) 
@@ -419,8 +418,8 @@ function get_wire(wire_num)
 
 	line_degrees(WIRE_GET_DEGREES, WIRE_GET_U_SPEED)
 	set_lift("take_wire")
-	shake_lift_get()
-	sleep(WIRE_GET_SLEEP)
+	-- shake_lift_get()
+	-- sleep(WIRE_GET_SLEEP)
 	set_lift("up")
 	ride_degrees(WIRE_GET_DEGREES, -WIRE_GET_D_SPEED) 
 end
@@ -526,7 +525,21 @@ for i=1, 20 do
 end
 r_wait_center()
 
+-- fake_read()
+--set_current_pos("8", 0)
+--get_router(1)
+--put_router("red", "long")
+--sleep(999)
+
+
 start()
+-- get_wire(1)
+-- put_wire(1)
+-- get_wire(2)
+-- put_wire(2)
+-- sleep(888)
+
+
 s_goto_point("21")
 routers = {}
 for i=1, 6 do
@@ -544,11 +557,11 @@ for i=4,6 do
 	end
 end
 
---get_wire(2)
+get_wire(2)
 goto_point("37")
 s_goto_point("34")
 put_router("yellow", "short")
---put_wire(2)
+put_wire(2)
 if MAGIC_ON then
 	r_set_ldegrees(MAGIC_DSC)
 	goto_point("11")
@@ -557,11 +570,11 @@ end
 goto_point("11")
 s_goto_point("21")
 
---get_wire(1)
+get_wire(1)
 
 routers[1] = check_router(1)
 routers[2] = check_router(2)
---put_wire(1)
+put_wire(1)
 
 white_count = 0
 for _, v in ipairs(routers) do

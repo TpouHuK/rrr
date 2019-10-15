@@ -32,18 +32,20 @@ BLACK = 20
 
 -- Router put
 ROUTER_SLEEP_TIME = 0.8
-LONG_DEGREES = 250
+LONG_DEGREES = 250 - 10 + 7
 BACK_LONG_NOTRIDE = 10 - 10
 
-ROUTER_GLOBAL = -10 + 10 - 1
+ROUTER_GLOBAL = 13
 
 ROUTER_0 = 160 - 10 + ROUTER_GLOBAL
-ROUTER_2 = 180 + ROUTER_GLOBAL
-
-ROUTER_1 = 130 + 10 + 10 + ROUTER_GLOBAL
-ROUTER_1S = 50 - 10 + ROUTER_GLOBAL
-ROUTER_3 = ROUTER_1
-ROUTER_3S = ROUTER_1S
+-- ROUTER_2 = 180 + ROUTER_GLOBAL
+ROUTER_1 = ROUTER_0
+ROUTER_2 = ROUTER_0
+ROUTER_3 = ROUTER_0
+-- ROUTER_1 = 130 + 10 + 10 + ROUTER_GLOBAL
+-- ROUTER_1S = 50 - 10 + ROUTER_GLOBAL
+-- ROUTER_3 = ROUTER_1
+-- ROUTER_3S = ROUTER_1S
 
 -- Router
 ROUTER_GET_SPEED = 25                            --подъезд
@@ -52,7 +54,7 @@ ROUTER_BACK_SPEED = 25 + 10 - 10                     --отъезд
 --ROUTER_BACK_SPEED = 10
 ROUTER_ROTATE_SPEED = 20                         --поворот к роутору
 ROUTER_DEGREES_BACK = 100
-ROUTER_DEGREES_FORWARD = 50
+ROUTER_DEGREES_FORWARD = 50 + 50
 PUT_ROUTER_SPEED = 30
 SHAKE_ROUTER_LIFT_DELTA = 10
 
@@ -64,7 +66,7 @@ WIRE_PUT_SPEED_CUBICS = 20                       --
 WIRE_PUT_SPEED_NOTHING = 50 + 10                 --
 WIRE_PUT_OVERSHOOT_COMP = -15 + 5                    --
 WIRE_PUT_SPEED_F = 30 - 10                         -- подъезд кабеля ложь
-WIRE_PUT_SLEEP = 0                         
+WIRE_PUT_SLEEP = 1                         
 
 
 WIRE_GET_DEGREES = 265 - 10                       --
@@ -82,12 +84,15 @@ FINISH_DEGREES = 600 + 100
 
 -- Lift setup
 LIFT_TAKE_WIRE    = 600 + 40 + 10 + 5 - 4
-LIFT_PUT_WIRE     = 460 + 15
+LIFT_PUT_WIRE     = 460 + 15 - 60 
+-- LIFT_PUT_WIRE     = 140 + 30 + 30 + 10 + 10 
 LIFT_TAKE_ROUTER  = 400 + 40 + 10 + 10 + 10 + 5 + 5 + 3
 LIFT_SHAKE_ROUTER = 100 + 40 + 40 + 30 + 10 - 10
-LIFT_PUT_ROUTER   = 500 + 40
+LIFT_PUT_ROUTER   = 100
 LIFT_FINISH       = 500 + 40
-LIFT_PRE_PUT      = 120 + 10 - 10 - 5
+-- LIFT_PRE_PUT      = 120 + 10 - 10 - 5
+LIFT_PRE_PUT      = 0
+
 
 LIFT_SPEED = 100                                 -- скорость поднималки
 ROTATE_LIFT_SPEED = 20                           -- скорость вращалки
