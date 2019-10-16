@@ -593,7 +593,7 @@ end
 local white_first_row_count = 0
 for _,v in ipairs{1,2,3} do
 	if routers[v] == "white" then
-		white_first_row_count = white_first_row_count + 1
+		white_first_row_count = white_first_row_count + 1	
 	end
 end
 
