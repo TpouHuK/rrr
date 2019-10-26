@@ -30,6 +30,25 @@ pub struct MotorPair {
     //TODO add message type instead of bare tuple
 }
 
+#[derive(Copy, Clone)]
+pub struct LineArgs {
+    pub pf_coff: f32,
+    pub df_coff: f32,
+    pub fspeed: i32,
+
+    pub ps_coff: f32,
+    pub ds_coff: f32,
+    pub sspeed: i32,
+
+    pub lx_coff: f32,
+    pub lx_cap: f32,
+}
+
+pub struct LineState {
+    pub last_error: i32,
+    pub lx: f32,
+}
+
 pub struct SensorPair {
     lsensor: ColorSensor,
     rsensor: ColorSensor,
@@ -519,12 +538,35 @@ pub fn set_black(val: i32) {
     BLACK.store(val, atomic::Ordering::Relaxed);
 }
 
+#[inline]
+fn line_step(err: i32, la: LineArgs, ls: &mut LineState) -> (i32, i32) {
 
+    let mut pc;
+    let mut dc;
+    let mut speed;
+    if ls.lx > la.lx_cap {
+        pc = la.ps_coff;
+        dc = la.ds_coff;
+        speed = la.sspeed;
+    } else {
+        pc = la.pf_coff;
+        dc = la.df_coff;
+        speed = la.fspeed;
+    }
+    
+    let p_v = err as f32 * pc;
+    let d_v = (err - ls.last_error) as f32 * dc;
+    
+    let diff = p_v + d_v;
+
+    ls.lx = (err*err) as f32;
+    ls.last_error = err;
+    return (diff as i32, speed)
+}
 
 //TODO fixme
 pub fn ride_line_degrees(
-    pid_k: (f32, f32, f32),
-    speed: i32,
+    line_args: LineArgs,
     robot: &mut RobotMoveBase,
     degrees: i32,
     ) {
@@ -537,21 +579,16 @@ pub fn ride_line_degrees(
         l - r
     }
 
-    let (p, i, d) = pid_k;
-    let mut pid = PID::new(p, i, d);
-
     let (ls, rs) = robot.sensor_pair.get_reflected_color();
     let error = error_fun(ls, rs);
-    let diff = pid.step(error);
-    // let mut counter;
-    // counter = 1;
+    let mut line_st = LineState{last_error: error, lx: 0.0};
+
     loop {
-        // counter += 1;
-        // println!("{}", counter);
         let (ls, rs) = robot.sensor_pair.get_reflected_color();
         let error = error_fun(ls, rs);
-        let diff = pid.step(error);
+        let (diff, speed) = line_step(error, line_args, &mut line_st);
         robot.motor_pair.set_steering(diff, speed);
+
         let ldiff = ((robot.motor_pair.lmotor.get_position().unwrap() as i32) - sl as i32).abs();
         let rdiff = ((robot.motor_pair.rmotor.get_position().unwrap() as i32) - sr as i32).abs();
         let average = (ldiff + rdiff)/2;
@@ -567,23 +604,19 @@ pub fn ride_line_degrees(
 }
 
 pub fn ride_line(
-    pid_k: (f32, f32, f32),
-    speed: i32,
+    line_args: LineArgs,
     robot: &mut RobotMoveBase,
     error_fun: &dyn Fn(i32, i32) -> i32,
     stop_cond: &dyn Fn(i32, i32) -> bool) {
 
-    let (p, i, d) = pid_k;
-    let mut pid = PID::new(p, i, d);
-
     let (ls, rs) = robot.sensor_pair.get_reflected_color();
     let error = error_fun(ls, rs);
-    let diff = pid.step(error);
+    let mut line_st = LineState{last_error: error, lx: 0.0};
 
     loop {
         let (ls, rs) = robot.sensor_pair.get_reflected_color();
         let error = error_fun(ls, rs);
-        let diff = pid.step(error);
+        let (diff, speed) = line_step(error, line_args, &mut line_st);
         robot.motor_pair.set_steering(diff, speed);
 
         if stop_cond(ls, rs) { break }
@@ -591,8 +624,7 @@ pub fn ride_line(
 }
 
 pub fn ride_line_cross(
-    pid_k: (f32, f32, f32),
-    speed: i32,
+    line_args: LineArgs,
     robot: &mut RobotMoveBase) {
     #[inline]
     fn stop_cross(l: i32, r: i32) -> bool{
@@ -607,13 +639,13 @@ pub fn ride_line_cross(
         (((l - r) as f32)) as i32
     }
 
-    ride_line(pid_k, speed, robot, &both_err, &stop_cross_white);
-    ride_line(pid_k, speed, robot, &both_err, &stop_cross);
-    //ride_line(pid_k, speed, robot, &both_err, &stop_cross_white);
+    ride_line(line_args, robot, &both_err, &stop_cross_white);
+    ride_line(line_args, robot, &both_err, &stop_cross);
+    //ride_line(line_args, robot, &both_err, &stop_cross_white);
 }
 
 pub fn ride_outer_line_left_stop(
-    pid_k: (f32, f32, f32),
+    line_args: LineArgs,
     speed: i32,
     robot: &mut RobotMoveBase) {
     #[inline]
@@ -631,15 +663,14 @@ pub fn ride_outer_line_left_stop(
     fn ride_right(l: i32, r: i32) -> i32{
         r - middle_grey()
     }
-    ride_line(pid_k, speed, robot, &ride_right, &stop_left_white);
-    ride_line(pid_k, speed, robot, &ride_right, &stop_left);
-    //ride_line(pid_k, speed, robot, &ride_right, &stop_left_white);
+    ride_line(line_args, robot, &ride_right, &stop_left_white);
+    ride_line(line_args, robot, &ride_right, &stop_left);
+    //ride_line(line_args, robot, &ride_right, &stop_left_white);
 }
 
 
 pub fn ride_line_left_stop(
-    pid_k: (f32, f32, f32),
-    speed: i32,
+    line_args: LineArgs,
     robot: &mut RobotMoveBase) {
     #[inline]
     fn stop_left(l: i32, r: i32) -> bool{
@@ -656,14 +687,13 @@ pub fn ride_line_left_stop(
     fn ride_right(l: i32, r: i32) -> i32{
         middle_grey() - r
     }
-    ride_line(pid_k, speed, robot, &ride_right, &stop_left_white);
-    ride_line(pid_k, speed, robot, &ride_right, &stop_left);
-    //ride_line(pid_k, speed, robot, &ride_right, &stop_left_white);
+    ride_line(line_args, robot, &ride_right, &stop_left_white);
+    ride_line(line_args, robot, &ride_right, &stop_left);
+    //ride_line(line_args, robot, &ride_right, &stop_left_white);
 }
 
 pub fn ride_line_right_stop(
-    pid_k: (f32, f32, f32),
-    speed: i32,
+    line_args: LineArgs,
     robot: &mut RobotMoveBase) {
     #[inline]
     fn stop_right(l: i32, r: i32) -> bool{
@@ -676,9 +706,9 @@ pub fn ride_line_right_stop(
     fn ride_left(l: i32, r: i32) -> i32{
         l - middle_grey()
     }
-    ride_line(pid_k, speed, robot, &ride_left, &stop_right_white);
-    ride_line(pid_k, speed, robot, &ride_left, &stop_right);
-    //ride_line(pid_k, speed, robot, &ride_left, &stop_right_white);
+    ride_line(line_args, robot, &ride_left, &stop_right_white);
+    ride_line(line_args, robot, &ride_left, &stop_right);
+    //ride_line(line_args, robot, &ride_left, &stop_right_white);
 }
 
 pub fn turn_count(robot: &mut RobotMoveBase, count: i32, speed: i32) {

@@ -80,14 +80,28 @@ fn main() {
     let send_ch7 = send_ch.clone();
     let send_ch8 = send_ch.clone();
 
-    let mut kpidb = Arc::new(Mutex::new((DEFAULT_KP,
-                                        DEFAULT_KI,
-                                        DEFAULT_KD)));
+    let mut kpidb = Arc::new(Mutex::new(line::LineArgs{
+    pf_coff: 0.0,
+    df_coff: 0.0,
+    fspeed: 0,
+    ps_coff: 0.0,
+    ds_coff: 0.0,
+    sspeed: 0,
+    lx_coff: 0.0,
+    lx_cap: 0.0,
+    }));
     let mut kpidb_c = kpidb.clone();
 
-    let mut kpid = Arc::new(Mutex::new((DEFAULT_KP,
-                                        DEFAULT_KI,
-                                        DEFAULT_KD)));
+    let mut kpid = Arc::new(Mutex::new(line::LineArgs{
+    pf_coff: 0.0,
+    df_coff: 0.0,
+    fspeed: 0,
+    ps_coff: 0.0,
+    ds_coff: 0.0,
+    sspeed: 0,
+    lx_coff: 0.0,
+    lx_cap: 0.0
+    }));
     let mut kpid_c = kpid.clone();
 
     let mut klspeed = Arc::new(Mutex::new(DEFAULT_SPEED));
@@ -137,13 +151,13 @@ fn main() {
                     graph::MoveAction::LineRide(lineride) => {
                         match lineride {
                             graph::LineRide::CrossStop => {
-                                line::ride_line_cross(pidb, lspeed, &mut robot);
+                                line::ride_line_cross(pidb, &mut robot);
                             },
                             graph::LineRide::LeftStop=> {
-                                line::ride_line_left_stop(pid, lspeed, &mut robot);
+                                line::ride_line_left_stop(pid, &mut robot);
                             },
                             graph::LineRide::RightStop => {
-                                line::ride_line_right_stop(pid, lspeed, &mut robot);
+                                line::ride_line_right_stop(pid, &mut robot);
                             },
                         }
                         is_centered = false;
@@ -171,7 +185,7 @@ fn main() {
                     let mut lspeed;
                     {pidb = *kpidb.lock().unwrap()};
                     {lspeed = *klspeed.lock().unwrap()};
-                    line::ride_line_degrees(pidb, lspeed, &mut robot, degrees);
+                    line::ride_line_degrees(pidb, &mut robot, degrees);
                     robot.motor_pair.set_steering(0, 0);
                 },
                 TypeOfMove::RightOutLine => {
@@ -348,17 +362,35 @@ fn main() {
             Ok(())
         };
 
-        let set_pid = move |_c: Context, (kp, ki, kd):(f32, f32, f32)|{
+        let set_pid = move |_c: Context, (pf, df, sf, ps, ds, ss, lxcoff, lxcapp):(f32, f32, i32, f32, f32, i32, f32, f32)|{
             let mutex = &*kpid_c;
             let mut tuple = mutex.lock().unwrap();
-            *tuple = (kp, ki, kd);
+            *tuple = line::LineArgs{
+            pf_coff: pf,
+            df_coff: df,
+            fspeed: sf,
+            ps_coff: ps,
+            ds_coff: ds,
+            sspeed: ss,
+            lx_coff: lxcoff,
+            lx_cap: lxcapp,
+            };
             Ok(())
         };
 
-        let set_pidb = move |_c: Context, (kp, ki, kd):(f32, f32, f32)|{
+        let set_pidb = move |_c: Context, (pf, df, sf, ps, ds, ss, lxcoff, lxcapp):(f32, f32, i32, f32, f32, i32, f32, f32)|{
             let mutex = &*kpidb_c;
             let mut tuple = mutex.lock().unwrap();
-            *tuple = (kp, ki, kd);
+            *tuple = line::LineArgs{
+            pf_coff: pf,
+            df_coff: df,
+            fspeed: sf,
+            ps_coff: ps,
+            ds_coff: ds,
+            sspeed: ss,
+            lx_coff: lxcoff,
+            lx_cap: lxcapp,
+            };
             Ok(())
         };
 

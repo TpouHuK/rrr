@@ -371,8 +371,18 @@ function put_router(color, side)
 end
 
 function set_defaults()
-	r_set_pid(P_M, I_M, D_M)
-	r_set_pidb(P_S, I_S, D_S)
+	-- r_set_pid(P_M, I_M, D_M)
+	-- r_set_pidb(P_S, I_S, D_S)
+	pf = 0.5
+	df = 10
+	sf = 40
+	ps = 1
+	ds = 10
+	ss = 10
+	lxcoff = 0.8
+	lxcapp = 1000
+	r_set_pid(pf, df, sf, ps, df, ss, lxcoff, lxcapp)
+	r_set_pidb(pf, df, sf, ps, df, ss, lxcoff, lxcapp)
 
 	r_set_lspeed(LINE_SPEED)
 	r_set_ldegrees(LINE_UDEGREES)
