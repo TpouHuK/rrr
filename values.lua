@@ -15,9 +15,9 @@ I_S = 0
 D_S = 8
 
 -- Line detection
-WHITE = 45
+WHITE = 45 + 5
 MIDLE_GREY = 35
-BLACK = 20
+BLACK = 20 - 5 
 
 -- Start
 START_DEGREES_UP = 320

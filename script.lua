@@ -11,7 +11,21 @@ function goto_point(point)
 end
 
 function s_goto_point(point)
-	r_set_lspeed(FAST_LINE_SPEED)
+	-- r_set_lspeed(FAST_LINE_SPEED)
+
+	pf = 0.5
+	df = 20
+	sf = 80
+
+	ps = 2
+	ds = 10
+	ss = 10
+	lxcoff = 0.8
+	lxcapp = 500
+
+	r_set_pid(pf, df, sf, ps, df, ss, lxcoff, lxcapp)
+	r_set_pidb(pf, df, sf, ps, df, ss, lxcoff, lxcapp)
+
 	goto_point(point)
 	set_defaults()
 end
@@ -373,14 +387,15 @@ end
 function set_defaults()
 	-- r_set_pid(P_M, I_M, D_M)
 	-- r_set_pidb(P_S, I_S, D_S)
-	pf = 0.5
+	pf = 0.7
 	df = 10
-	sf = 40
-	ps = 1
+	sf = 20
+
+	ps = 2
 	ds = 10
 	ss = 10
 	lxcoff = 0.8
-	lxcapp = 1000
+	lxcapp = 500
 	r_set_pid(pf, df, sf, ps, df, ss, lxcoff, lxcapp)
 	r_set_pidb(pf, df, sf, ps, df, ss, lxcoff, lxcapp)
 
