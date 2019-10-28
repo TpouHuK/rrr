@@ -106,7 +106,7 @@ fn main() {
 
     let mut klspeed = Arc::new(Mutex::new(DEFAULT_SPEED));
     let mut klspeed_c = klspeed.clone();
-    let mut klspeed_c2 = klspeed.clone();
+    // let mut klspeed_c2 = klspeed.clone();
 
 
     let mut kmspeed = Arc::new(Mutex::new(MACRO_SPEED));
