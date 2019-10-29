@@ -364,7 +364,7 @@ fn main() {
             Ok(())
         };
 
-        let set_pid = move |_c: Context, (pf, df, sf, ps, ds, ss, lxcoff, lxtopcapp, lxbotcapp):(f32, f32, i32, f32, f32, i32, f32, f32)|{
+        let set_pid = move |_c: Context, (pf, df, sf, ps, ds, ss, lxcoff, lxtopcapp, lxbotcapp):(f32, f32, i32, f32, f32, i32, f32, f32, f32) |{
             let mutex = &*kpid_c;
             let mut tuple = mutex.lock().unwrap();
             *tuple = line::LineArgs{
@@ -381,7 +381,7 @@ fn main() {
             Ok(())
         };
 
-        let set_pidb = move |_c: Context, (pf, df, sf, ps, ds, ss, lxcoff, lxtopcapp, lxbotcapp):(f32, f32, i32, f32, f32, i32, f32, f32)|{
+        let set_pidb = move |_c: Context, (pf, df, sf, ps, ds, ss, lxcoff, lxtopcapp, lxbotcapp):(f32, f32, i32, f32, f32, i32, f32, f32, f32)|{
             let mutex = &*kpidb_c;
             let mut tuple = mutex.lock().unwrap();
             *tuple = line::LineArgs{

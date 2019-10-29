@@ -552,7 +552,7 @@ fn line_step(err: i32, la: LineArgs, ls: &mut LineState) -> (i32, i32) {
         ls.sstate = 0;
     }
 
-    if ls.sstate == 0 {
+    if ls.sstate == 1 {
         pc = la.ps_coff;
         dc = la.ds_coff;
         speed = la.sspeed;
@@ -589,7 +589,7 @@ pub fn ride_line_degrees(
 
     let (ls, rs) = robot.sensor_pair.get_reflected_color();
     let error = error_fun(ls, rs);
-    let mut line_st = LineState{last_error: error, lx: 0.0, sstate: 1};
+    let mut line_st = LineState{last_error: error, lx: 0.0, sstate: 0};
 
     loop {
         let (ls, rs) = robot.sensor_pair.get_reflected_color();
@@ -619,7 +619,7 @@ pub fn ride_line(
 
     let (ls, rs) = robot.sensor_pair.get_reflected_color();
     let error = error_fun(ls, rs);
-    let mut line_st = LineState{last_error: error, lx: 0.0};
+    let mut line_st = LineState{last_error: error, lx: 0.0, sstate: 0};
 
     loop {
         let (ls, rs) = robot.sensor_pair.get_reflected_color();

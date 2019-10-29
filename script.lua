@@ -12,19 +12,6 @@ end
 
 function s_goto_point(point)
 	-- r_set_lspeed(FAST_LINE_SPEED)
-	pf = 0.5
-	df = 20
-	sf = 80
-
-	ps = 4
-	ds = 20
-	ss = 20
-	lxcoff = 0.8
-	lxcapp = 500
-
-	r_set_pid(pf, df, sf, ps, df, ss, lxcoff, lxcapp)
-	r_set_pidb(pf, df, sf, ps, df, ss, lxcoff, lxcapp)
-
 	goto_point(point)
 	set_defaults()
 end
@@ -38,19 +25,6 @@ function line_degrees(degrees, speed)
 -- 	if speed then
 -- 		r_set_lspeed(speed)
 -- 	end
-
-	pf = 0.7
-	df = 10
-	sf = 20
-
-	ps = 2
-	ds = 10
-	ss = 10
-	lxcoff = 0.8
-	lxcapp = 500
-	r_set_pid(pf, df, sf, ps, df, ss, lxcoff, lxcapp)
-	r_set_pidb(pf, df, sf, ps, df, ss, lxcoff, lxcapp)
-
 	r_ride_line_degrees(degrees)
 	r_wait_till_arrival()
 -- 	if speed then
@@ -408,9 +382,10 @@ function set_defaults()
 	ds = 10
 	ss = 20
 	lxcoff = 0.8
-	lxcapp = 500
-	r_set_pid(pf, df, sf, ps, df, ss, lxcoff, lxcapp)
-	r_set_pidb(pf, df, sf, ps, df, ss, lxcoff, lxcapp)
+	lxtopcapp = 600
+	lxbotcapp = 400
+	r_set_pid(pf, df, sf, ps, df, ss, lxcoff, lxtopcapp, lxbotcapp)
+	r_set_pidb(pf, df, sf, ps, df, ss, lxcoff, lxtopcapp, lxbotcapp)
 
 	r_set_lspeed(LINE_SPEED)
 	r_set_ldegrees(LINE_UDEGREES)
