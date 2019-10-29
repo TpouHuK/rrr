@@ -41,12 +41,14 @@ pub struct LineArgs {
     pub sspeed: i32,
 
     pub lx_coff: f32,
-    pub lx_cap: f32,
+    pub lx_topcap: f32,
+    pub lx_botcap: f32,
 }
 
 pub struct LineState {
     pub last_error: i32,
     pub lx: f32,
+    pub sstate: i32, 
 }
 
 pub struct SensorPair {
@@ -544,7 +546,13 @@ fn line_step(err: i32, la: LineArgs, ls: &mut LineState) -> (i32, i32) {
     let mut pc;
     let mut dc;
     let mut speed;
-    if ls.lx > la.lx_cap {
+    if ls.lx > la.lx_topcap {
+        ls.sstate = 1;
+    } else if ls.lx < la.lx_botcap {
+        ls.sstate = 0;
+    }
+
+    if ls.sstate == 0 {
         pc = la.ps_coff;
         dc = la.ds_coff;
         speed = la.sspeed;
@@ -581,7 +589,7 @@ pub fn ride_line_degrees(
 
     let (ls, rs) = robot.sensor_pair.get_reflected_color();
     let error = error_fun(ls, rs);
-    let mut line_st = LineState{last_error: error, lx: 0.0};
+    let mut line_st = LineState{last_error: error, lx: 0.0, sstate: 1};
 
     loop {
         let (ls, rs) = robot.sensor_pair.get_reflected_color();

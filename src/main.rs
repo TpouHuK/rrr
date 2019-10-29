@@ -88,7 +88,8 @@ fn main() {
     ds_coff: 0.0,
     sspeed: 0,
     lx_coff: 0.0,
-    lx_cap: 0.0,
+    lx_topcap: 0.0,
+    lx_botcap: 0.0,
     }));
     let mut kpidb_c = kpidb.clone();
 
@@ -100,7 +101,8 @@ fn main() {
     ds_coff: 0.0,
     sspeed: 0,
     lx_coff: 0.0,
-    lx_cap: 0.0
+    lx_topcap: 0.0,
+    lx_botcap: 0.0,
     }));
     let mut kpid_c = kpid.clone();
 
@@ -362,7 +364,7 @@ fn main() {
             Ok(())
         };
 
-        let set_pid = move |_c: Context, (pf, df, sf, ps, ds, ss, lxcoff, lxcapp):(f32, f32, i32, f32, f32, i32, f32, f32)|{
+        let set_pid = move |_c: Context, (pf, df, sf, ps, ds, ss, lxcoff, lxtopcapp, lxbotcapp):(f32, f32, i32, f32, f32, i32, f32, f32)|{
             let mutex = &*kpid_c;
             let mut tuple = mutex.lock().unwrap();
             *tuple = line::LineArgs{
@@ -373,12 +375,13 @@ fn main() {
             ds_coff: ds,
             sspeed: ss,
             lx_coff: lxcoff,
-            lx_cap: lxcapp,
+            lx_topcap: lxtopcapp,
+            lx_botcap: lxbotcapp,
             };
             Ok(())
         };
 
-        let set_pidb = move |_c: Context, (pf, df, sf, ps, ds, ss, lxcoff, lxcapp):(f32, f32, i32, f32, f32, i32, f32, f32)|{
+        let set_pidb = move |_c: Context, (pf, df, sf, ps, ds, ss, lxcoff, lxtopcapp, lxbotcapp):(f32, f32, i32, f32, f32, i32, f32, f32)|{
             let mutex = &*kpidb_c;
             let mut tuple = mutex.lock().unwrap();
             *tuple = line::LineArgs{
@@ -389,7 +392,8 @@ fn main() {
             ds_coff: ds,
             sspeed: ss,
             lx_coff: lxcoff,
-            lx_cap: lxcapp,
+            lx_topcap: lxtopcapp,
+            lx_botcap: lxbotcapp,
             };
             Ok(())
         };
