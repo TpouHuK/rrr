@@ -1,3 +1,53 @@
+TRANS_LINE = {}
+SUPER_FAST_LINE = {}
+
+ACCUR_LINE = {
+	p_fast = 0.8,
+	d_fast = 30,
+	speed_fast = 20,
+
+	p_slow = 1,
+	d_slow = 30,
+	speed_slow = 10,
+
+	top_cap = 900,
+	bot_cap = 50,
+	lx_coff = 0.9,
+}
+
+---[[
+SUPER_FAST_LINE = {
+	p_fast = 0.4,
+	d_fast = 20,
+	speed_fast = 80,
+
+	p_slow = 2.5,
+	d_slow = 50,
+	speed_slow = 20,
+
+	top_cap = 400,
+	bot_cap = 50,
+	lx_coff = 0.9,
+}
+--]]
+
+TRANS_LINE = {
+	p_fast = 0.7,
+	d_fast = 30,
+	speed_fast = 30,
+
+	p_slow = 0.5,
+	d_slow = 30,
+	speed_slow = 20,
+
+	top_cap = 900,
+	bot_cap = 100,
+	lx_coff = 0.9,
+}
+
+-- SUPER_FAST_LINE = TRANS_LINE
+
+
 -- Magic
 MAGIC_ON = true 
 MAGIC_DSC = 95
@@ -45,7 +95,7 @@ ROUTER_SLEEP_TIME = 2
 LONG_DEGREES = 247
 BACK_LONG_NOTRIDE = 0
 
-ROUTER_GLOBAL = 13
+ROUTER_GLOBAL = 13 + 5
 
 ROUTER_0 = 150 + ROUTER_GLOBAL
 ROUTER_1 = ROUTER_0

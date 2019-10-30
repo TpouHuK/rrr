@@ -5,15 +5,30 @@ function sleep(secs)
 	r_sleep(secs*1000)
 end
 
+function setup_transport_line()
+	set_line_args(TRANS_LINE)
+end
+
+function setup_accurate_line()
+	set_line_args(ACCUR_LINE)
+end
+
+function setup_super_fast_line()
+	set_line_args(SUPER_FAST_LINE)
+end
+
 function goto_point(point)
+	setup_transport_line()
 	r_goto_point(point)
 	r_wait_till_arrival()
 end
 
 function s_goto_point(point)
-	-- r_set_lspeed(FAST_LINE_SPEED)
-	goto_point(point)
-	set_defaults()
+	setup_super_fast_line()
+	-- goto_point(point)
+	r_goto_point(point)
+	r_wait_till_arrival()
+	-- set_defaults()
 end
 
 function rotate_to_point(point)
@@ -22,15 +37,11 @@ function rotate_to_point(point)
 end
 
 function line_degrees(degrees, speed)
--- 	if speed then
--- 		r_set_lspeed(speed)
--- 	end
+	-- TODO fix speed argument
+	setup_accurate_line()
 	r_ride_line_degrees(degrees)
 	r_wait_till_arrival()
--- 	if speed then
--- 		set_defaults()
--- 	end
-	set_defaults()
+	-- set_defaults()
 end
 
 function set_rotate(pos)
@@ -110,6 +121,7 @@ end
 -- MAIN FUNCTIONS 
 -- === === === === === ===
 function start_line_ride()
+	setup_transport_line()
 	r_set_lspeed(FIRST_LINE_SPEED)
 	r_rolls()
 	--read_markers()
@@ -285,7 +297,6 @@ function put_router(color, side)
 	if side == "long" then
 		-- longride
 		line_degrees(LONG_DEGREES) -- forward
-		
 	elseif side == "short" then
 		-- nothing
 	end
@@ -296,25 +307,24 @@ function put_router(color, side)
 		set_rotate(0)
 		line_degrees(ROUTER_0) -- forward
 
-		
 		set_lift("shake_router")
 		shake()
 		set_lift("put_router")
 		sleep(SLEEP_TIME)
+		set_lift("up")
 		ride_degrees(ROUTER_0, -20) -- return
 		set_lift("up")
 
 	elseif where == 1 then
 		set_rotate(1)
 		line_degrees(ROUTER_1) -- forward
-
 		--ride_degrees_steer(-20, ROUTER_1S) -- steering right
-
 		
 		set_lift("shake_router")
 		shake()
 		set_lift("put_router")
 		sleep(SLEEP_TIME)
+		set_lift("up")
 		set_rotate(0)
 		set_rotate(3)
 		set_lift("up")
@@ -328,14 +338,13 @@ function put_router(color, side)
 	elseif where == 3 then
 		set_rotate(3)
 		line_degrees(ROUTER_3) -- forward
-
 		--ride_degrees_steer(20, ROUTER_3S) -- steering right
-
 		
 		set_lift("shake_router")
 		shake()
 		set_lift("put_router")
 		sleep(SLEEP_TIME)
+		set_lift("up")
 		set_rotate(0)
 		set_rotate(1)
 		set_lift("up")
@@ -355,6 +364,7 @@ function put_router(color, side)
 		set_lift("put_router")
 
 		sleep(SLEEP_TIME)
+		set_lift("up")
 		set_rotate(0)
 		set_lift("up")
 		ride_degrees(ROUTER_2, -20) -- return
@@ -371,21 +381,18 @@ function put_router(color, side)
 
 end
 
+function set_line_args(a)
+	r_set_pid(a.p_fast, a.d_fast, a.speed_fast, 
+			a.p_slow, a.d_slow, a.speed_slow, 
+			a.lx_coff, a.top_cap, a.bot_cap)
+	r_set_pidb(a.p_fast, a.d_fast, a.speed_fast, 
+			a.p_slow, a.d_slow, a.speed_slow, 
+			a.lx_coff, a.top_cap, a.bot_cap)
+end
+
 function set_defaults()
 	-- r_set_pid(P_M, I_M, D_M)
 	-- r_set_pidb(P_S, I_S, D_S)
-	pf = 0.7
-	df = 10
-	sf = 50
-
-	ps = 1
-	ds = 10
-	ss = 20
-	lxcoff = 0.8
-	lxtopcapp = 600
-	lxbotcapp = 400
-	r_set_pid(pf, df, sf, ps, df, ss, lxcoff, lxtopcapp, lxbotcapp)
-	r_set_pidb(pf, df, sf, ps, df, ss, lxcoff, lxtopcapp, lxbotcapp)
 
 	r_set_lspeed(LINE_SPEED)
 	r_set_ldegrees(LINE_UDEGREES)
@@ -396,7 +403,6 @@ function set_defaults()
 	r_set_white(WHITE)
 	r_set_middle_grey(MIDLE_GREY)
 	r_set_black(BLACK)
-
 
 	D_ride_degrees_speed = RIDE_DEGREES_SPEED
 end
@@ -526,7 +532,7 @@ set_defaults()
 for i=1, 20 do
 	print("REEEEEEEEEEEEEEEEEEEEEEEEadddy")
 end
-r_wait_center()
+-- r_wait_center()
 
 start()
 
