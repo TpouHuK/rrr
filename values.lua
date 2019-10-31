@@ -62,9 +62,9 @@ H.colors = {
 
 -- #Magic
 H.magic = {
-	magic_on = true ,
-	magic_dsc = 95,
-	magic_rgr = 10,
+	on = true ,
+	dsc = 95,
+	rgr = 10,
 }
 
 -- #Router color reading
@@ -83,11 +83,13 @@ H.speed = {
 	degrees_sd = 20,
 	rotate_sd = 30,
 	macro_sd = 30,
+	degrees_sd = 30,
 }
 
 
 -- #Router put
 local router_global = 18
+
 H.put_router = {
 	wait_sc = 2,
 	long_dg = 247,
@@ -97,6 +99,8 @@ H.put_router = {
 	r1_dg = router_0,
 	r2_dg = router_0,
 	r3_dg = router_0,
+
+	speed_sd = 50,
 }
 
 
@@ -126,9 +130,11 @@ H.put_wire = {
 
 -- #Wire get
 H.get_wire = {
-	forward_sd = 255,
+	forward_dg = 255,
+
 	forward_sd = 25,
 	back_sd = 55,
+
 	wait_sc = 0,
 }
 
