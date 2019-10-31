@@ -1,150 +1,155 @@
-TRANS_LINE = {}
-SUPER_FAST_LINE = {}
+H = {}
 
-ACCUR_LINE = {
-	p_fast = 0.8,
-	d_fast = 30,
-	speed_fast = 20,
+-- #Line
+H.line = {
+	-- Distance from sensors to wheels
+	udegrees_dg = 85,
 
-	p_slow = 1,
-	d_slow = 30,
-	speed_slow = 10,
+	-- ##Coefficients
+	-- Accurate line for actions with objects
+	accurate = {
+		pf_cf = 0.8,
+		df_cf = 30,
+		sf_sd = 20,
 
-	top_cap = 900,
-	bot_cap = 50,
-	lx_coff = 0.9,
+		ps_cf = 1,
+		ds_cf = 30,
+		ss_sd = 10,
+
+		top_pt = 900,
+		bot_pt = 50,
+		lx_cf = 0.9,
+	},
+
+	-- Fast line where we moving on long distances
+	fast = {
+		pf_cf = 0.4,
+		df_cf = 20,
+		sf_sd = 80,
+		      
+		ps_cf = 2.5,
+		ds_cf = 50,
+		ss_sd = 20,
+		      
+		top_pt = 400,
+		bot_pt = 50,
+		lx_cf = 0.9,
+	},
+
+	-- Typical line to move around without speed/precision
+	trans = {
+		pf_cf = 0.7,
+		df_cf = 30,
+		sf_sd = 30,
+		     
+		ps_cf = 0.5,
+		ds_cf = 30,
+		ss_sd = 20,
+		     
+		top_p = 900,
+		bot_p = 100,
+		lx_cf = 0.9,
+	},
 }
 
----[[
-SUPER_FAST_LINE = {
-	p_fast = 0.4,
-	d_fast = 20,
-	speed_fast = 80,
-
-	p_slow = 2.5,
-	d_slow = 50,
-	speed_slow = 20,
-
-	top_cap = 400,
-	bot_cap = 50,
-	lx_coff = 0.9,
-}
---]]
-
-TRANS_LINE = {
-	p_fast = 0.7,
-	d_fast = 30,
-	speed_fast = 30,
-
-	p_slow = 0.5,
-	d_slow = 30,
-	speed_slow = 20,
-
-	top_cap = 900,
-	bot_cap = 100,
-	lx_coff = 0.9,
+-- #Line detection
+H.colors = {
+	white_pt = 50,
+	grey_pt = 35,
+	black_pt = 15,
 }
 
--- SUPER_FAST_LINE = TRANS_LINE
+
+-- #Magic
+H.magic = {
+	magic_on = true ,
+	magic_dsc = 95,
+	magic_rgr = 10,
+}
+
+-- #Router color reading
+H.router_bw_limit_pt = 40
+
+-- #Start move
+local turn_dg = 110
+H.start = {
+	up_dg = 320,
+	left_dg = turn_dg,
+	diag_dg = 90,
+	right_dg = turn_dg,
+}
+
+H.speed = {
+	degrees_sd = 20,
+	rotate_sd = 30,
+	macro_sd = 30,
+}
 
 
--- Magic
-MAGIC_ON = true 
-MAGIC_DSC = 95
-MAGIC_RGR = 10
+-- #Router put
+local router_global = 18
+H.put_router = {
+	wait_sc = 2,
+	long_dg = 247,
+	backlongnoride_dg = 0,
 
-BLACK_WHITE_CS_LIMIT = 40
-
--- Line coeff
-P_M = 0.8
-I_M = 0
-D_M = 20
-
-P_S = 0.4
-I_S = 0 
-D_S = 8
-
--- Line detection
-WHITE = 45 + 5
-MIDLE_GREY = 35
-BLACK = 20 - 5 
-
--- Start
-START_DEGREES_UP = 320
-START_DEGREES_LEFT = 110
-START_DEGREES_DIAG = 90
-START_DEGREES_RIGHT = START_DEGREES_LEFT
-
--- Line speed
-FIRST_LINE_SPEED = 40
-LINE_SPEED = 40
-FAST_LINE_SPEED = LINE_SPEED
-
--- Line cross degrees
-LINE_UDEGREES = 85
-RIDE_DEGREES_SPEED = 20
-
--- Rotate speed
-ROTATE_SPEED = 30
--- Degrees speed (does nothing)
-MACRO_SPEED = 30
+	r0_dg = 150 + router_global,
+	r1_dg = router_0,
+	r2_dg = router_0,
+	r3_dg = router_0,
+}
 
 
--- Router put
-ROUTER_SLEEP_TIME = 2
-LONG_DEGREES = 247
-BACK_LONG_NOTRIDE = 0
+-- #Router get
+H.get_router = {
+	get_sd = 25,
+	back_sd = 25,
+	rotate_sd = 20,
 
-ROUTER_GLOBAL = 13 + 5
+	back_dg = 100,
+	forward_dg = 50 + 50,
+	put_sd = 30,
+}
 
-ROUTER_0 = 150 + ROUTER_GLOBAL
-ROUTER_1 = ROUTER_0
-ROUTER_2 = ROUTER_0
-ROUTER_3 = ROUTER_0
+-- #Wire put
+H.put_wire = {
+	forward_sd = 20,
+	cubics_sd = 20,
+	nothing_sd = 60,
 
--- Router
-ROUTER_GET_SPEED = 25
-ROUTER_BACK_SPEED = 25
-ROUTER_ROTATE_SPEED = 20
-ROUTER_DEGREES_BACK = 100
-ROUTER_DEGREES_FORWARD = 50 + 50
-PUT_ROUTER_SPEED = 30
-SHAKE_ROUTER_LIFT_DELTA = 10
+	line_dg = 410,
+	forward_dg = 231,
+	overshoot_dg = -10,
 
--- Wire put
-WIRE_SHAKE = 20
-WIRE_PUT_DEGREES = 231
-WIRE_PUT_LINE_DEGREES = 410
-WIRE_PUT_SPEED_CUBICS = 20
-WIRE_PUT_SPEED_NOTHING = 60
-WIRE_PUT_OVERSHOOT_COMP = -10
-WIRE_PUT_SPEED_F = 20
-WIRE_PUT_SLEEP = 1
+	wait_sc = 1,
+}
 
+-- #Wire get
+H.get_wire = {
+	forward_sd = 255,
+	forward_sd = 25,
+	back_sd = 55,
+	wait_sc = 0,
+}
 
-WIRE_GET_DEGREES = 255
-WIRE_GET_U_SPEED = 25
-WIRE_GET_D_SPEED = 55
-WIRE_GET_SLEEP = 0
+-- #Finish
+H.finish = {
+	rotate_dg = 48,
+	forward_dg = 700,
+}
 
--- Shake
-SHAKE_SPEED = 15
-FORWARD_SHAKE_DEGREES = 48
-SIDE_SHAKE_DEGREES = 30
+-- #Lift setup
 
--- Finish
-FINISH_DEGREES_ROTATE = 48
-FINISH_DEGREES = 700
+H.lift = {
+	take_wire    = 651,
+	put_wire     = 415,
+	take_router  = 483,
+	shake_router = 0,
+	put_router   = 210,
+	finish       = 540,
+	pre_put      = 0,
+	speed = 100,
+}
 
--- Lift setup
-LIFT_TAKE_WIRE    = 651
-LIFT_PUT_WIRE     = 415  
-LIFT_TAKE_ROUTER  = 483
-LIFT_SHAKE_ROUTER = 0
-LIFT_PUT_ROUTER   = 210
-LIFT_FINISH       = 540
-LIFT_PRE_PUT      = 0
-
-
-LIFT_SPEED = 100
-ROTATE_LIFT_SPEED = 20
+-- #Hand
+H.hand_speed = 20
