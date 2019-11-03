@@ -68,9 +68,9 @@ end
 function black_white_cs()
 	h, s, v = r_get_cs_hsv()
 	if v > H.router_bw_limit_pt then
-		return 'white'
+		return "white"
 	else
-		return 'black'
+		return "black"
 	end
 end
 
@@ -115,8 +115,8 @@ end
 function start_line_ride()
 	setup_transport_line()
 	r_rolls()
-	--read_markers()
-	fake_read()
+	read_markers()
+	--fake_read()
 	r_wait_till_arrival()
 	set_defaults()
 	ride_degrees(100)
@@ -168,8 +168,9 @@ function set_lift(where)
 	elseif where == "take_router"  then degrees = H.lift.take_router
 	elseif where == "shake_router" then degrees = H.lift.shake_router
 	elseif where == "put_router"   then degrees = H.lift.put_router
-	elseif where == "finish" then degrees = H.lift_finish
-	elseif where == "pre_put" then degrees = H.lift_pre_put
+	elseif where == "finish" then degrees = H.lift.finish
+	elseif where == "pre_put" then degrees = H.lift.pre_put
+	elseif where == "back_take" then degrees = H.lift.back_take
 	end
 
 	r_set_lift(-degrees, H.lift.speed)
@@ -186,6 +187,7 @@ function get_router(cub_n)
 	if (CUR_ANG == 90) and (CUR_POINT == "8")then
 		blue_magic = true
 	end
+	routers[cub_n] = "empty"
 
 	goto_point(gt)
 	r_set_rspeed(H.get_router.rotate_sd)
@@ -201,7 +203,7 @@ function get_router(cub_n)
 			end
 		end
 		if (cub_n == 1) then -- or (cub_n == 2) then -- or (cub_n == 3) then
-			ride_degrees_steer(-100, H.magic.rgr, H.get_rotuer.rotate_sd)
+			ride_degrees_steer(-100, H.magic.rgr, H.get_router.rotate_sd)
 		end
 	end
 
@@ -236,8 +238,6 @@ function put_router(color, side)
 
 	goto_point(gt)
 	rotate_to_point(rt)
-	set_lift("pre_put")
-	set_rotate(0)
 
 	r_set_mspeed(H.put_router.speed_sd)
 	if side == "long" then
@@ -250,27 +250,28 @@ function put_router(color, side)
 
 	local LH = H.put_router
 
-	set_rotate(0)
+	set_rotate(where)
 	line_degrees(LH.r0_dg)
-	set_lift("put_router")
 	sleep(LH.wait_sc)
+	set_lift("put_router")
 	set_lift("up")
+	set_rotate(0)
 	ride_degrees(LH.r0_dg, -20)
 
 	set_defaults()
 
 	if side == "long" then
-		ride_degrees(H.long_dg, -20)
+		ride_degrees(LH.long_dg, -20)
 	end
 end
 
 function set_line_args(a)
-	r_set_pid(a.p_fast, a.d_fast, a.speed_fast, 
-			a.p_slow, a.d_slow, a.speed_slow, 
-			a.lx_coff, a.top_cap, a.bot_cap)
-	r_set_pidb(a.p_fast, a.d_fast, a.speed_fast, 
-			a.p_slow, a.d_slow, a.speed_slow, 
-			a.lx_coff, a.top_cap, a.bot_cap)
+	r_set_pid(a.pf_cf, a.df_cf, a.sf_sd, 
+			a.ps_cf, a.ds_cf, a.ss_sd, 
+			a.lx_cf, a.top_pt, a.bot_pt)
+	r_set_pidb(a.pf_cf, a.df_cf, a.sf_sd, 
+			a.ps_cf, a.ds_cf, a.ss_sd, 
+			a.lx_cf, a.top_pt, a.bot_pt)
 end
 
 function set_defaults()
@@ -309,7 +310,7 @@ function put_wire(num)
 	elseif num == 1 then
 		speed = -H.put_wire.cubics_sd
 	end
-	local degrees = H.put_wire.line_dg + H.put_wire.forward_dg - H.Put_wire.overshoot_dg
+	local degrees = H.put_wire.line_dg + H.put_wire.forward_dg - H.put_wire.overshoot_dg
 
 	ride_degrees(degrees, speed) 
 end
@@ -363,13 +364,13 @@ function start()
 end
 
 function finish()
-	goto_point("12")
-	s_goto_point("14")
+	-- goto_point("12")
+	-- s_goto_point("14")
 	goto_point("32")
 	rotate_to_point(33)
-	set_lift("finish")
-	ride_degrees_steer(100, FINISH_DEGREES_ROTATE)
-	ride_degrees(FINISH_DEGREES, -100)
+	-- set_lift("finish")
+	-- ride_degrees_steer(100, FINISH_DEGREES_ROTATE)
+	-- ride_degrees(FINISH_DEGREES, -100)
 end
 
 function print_routers()
@@ -406,8 +407,127 @@ function print_smile()
 	print(" $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  ")
 end
 
+function get_available_router(order)
+	for _,v in ipairs(order) do
+		if routers[v] == "black" then
+			routers[v] = "empty"
+			get_router(v)
+			break
+		end
+	end
+end
+function white_count()
+	local wc = 0
+	for _, v in ipairs(routers) do
+		if v == "white" then
+			wc = wc + 1
+		end
+	end
+	return wc
+end
 
--- What a mess, TODO: break main function apart
+function main2()
+	print_smile()
+	set_defaults()
+	start()
+
+	--goto_point("11")
+	s_goto_point("21")
+
+	routers = {
+		"unknown", 
+		"unknown",
+		"unknown",
+		"unknown",
+		"unknown",
+		"unknown",
+	}
+
+	local router_taken = false
+	local back = false
+	local everything_known = false
+
+	for i=4,6 do
+		routers[i] = check_router(i)
+		print(i, routers[i])
+		if (routers[i] == "black") and (not router_taken) then
+			routers[i] = "empty"
+			if not back then
+				back = true
+				back_take()
+			else
+				router_taken = true
+				get_router(i)
+			end
+		end
+	end
+	get_wire(2)
+
+	if not router_taken then
+		routers[1] = "black"
+		routers[2] = "black"
+		routers[3] = "black"
+		
+		put_wire(1)
+
+		goto_point(21)
+		get_router(1)
+		put_router("red", "long")
+		get_router(3)
+		put_router("blue", "long")
+		-- get_router(1)
+	else
+		put_router("blue", "long")
+		put_wire(1)
+		
+		goto_point(21)
+		routers[1] = check_router(1)
+		if routers[1] == "black" then
+			get_router(1)
+			put_router("red", "long")
+			if white_count() == 0 then
+				routers[2] = "white"
+				routers[3] = "white"
+				-- get_available_router({1,2,3,4,5,6})
+			elseif white_count() == 1 then
+				routers[2] = check_router(2)
+				if routers[2] == "black" then
+					routers[3] = "white"
+					-- get_router(2)
+				else
+					routers[3] = "black"
+					-- get_router(3)
+				end
+			end
+		else
+			routers[2] = check_router(2)
+			if routers[2] == "black" then
+				get_router(2)
+				put_router("red", "long")
+
+				if white_count() == 2 then
+					routers[3] = "black"
+				else
+					routers[3] = "white"
+				end
+			else
+				routers[3] = "black"
+			end
+		end
+		
+		
+	end
+	get_available_router({1,2,3,4,5,6})
+	get_wire(1)
+	put_router("green", "short")
+	put_wire(2)
+	goto_point("14")
+	sleep(1)
+	swap_router()
+	put_router("yellow", "long")
+	finish()
+end
+
 function main()
 	print_smile()
 	set_defaults()
@@ -420,13 +540,19 @@ function main()
 	end
 
 	is_router_taken = false
+	is_first = false
 	for i=4,6 do
 		routers[i] = check_router(i)
 		print(i, routers[i])
 		if (routers[i] == "black") and (not is_router_taken) then
 			routers[i] = "empty"
-			get_router(i)
-			is_router_taken = true
+			if not is_first then
+				is_first = true
+				back_take()
+			else
+				is_router_taken = true
+				get_router(i)
+			end
 		end
 	end
 
@@ -449,6 +575,7 @@ function main()
 	routers[2] = check_router(2)
 	put_wire(1)
 
+	-- == -- ==
 	white_count = 0
 	for _, v in ipairs(routers) do
 		if v == "white" then
@@ -461,9 +588,7 @@ function main()
 	else
 		routers[3] = "white"
 	end
-
-	print_routers()
-
+	-- == -- ==
 
 	-- blue
 	for _,v in ipairs{2,3,1,4,5,6} do
@@ -508,6 +633,50 @@ function main()
 			break
 		end
 	end
-	put_router("green", "short")
-	-- finish()
+
+	-- goto_point("21")
+	-- s_goto_point("9")
+	goto_point("12")
+	swap_router()
+	put_router("green", "long")
+	finish()
 end
+
+function back_take()
+	local forward_degrees = 110
+	set_lift("back_take")
+	ride_degrees_steer(0, forward_degrees, 20) -- forward
+	ride_degrees_steer(50, 200, -30) -- take
+	set_lift("up")
+	ride_degrees_steer(50, 200, 30) -- back rotate
+
+	if not H.magic.back_take then
+		ride_degrees_steer(0, forward_degrees, -20) -- backward
+	end
+end
+
+function swap_router()
+	set_lift("back_take")
+	ride_degrees_steer(50, 50, 20)
+	set_lift("up")
+	ride_degrees_steer(50, 20, -20)
+	ride_degrees_steer(-50, 790, 40) --megaturn
+	set_lift("take_router")
+	ride_degrees_steer(0, 150 + 10, 20)
+	set_lift("up")
+	ride_degrees_steer(-100, 255, 20)
+	line_degrees(120)
+end
+
+function test_backtake()
+	set_defaults()
+	back_take()
+end
+
+function test_backfront()
+	set_defaults()
+	swap_router()
+end
+
+--test_backfront()
+main2()
