@@ -82,7 +82,7 @@ H.start = {
 
 H.speed = {
 	degrees_sd = 20, --+ 10,
-	rotate_sd = 30, --+ 10,
+	rotate_sd = 30 + 10, --+ 10,
 	macro_sd = 30, --+ 10,
 	degrees_sd = 30, --+ 10,
 }
