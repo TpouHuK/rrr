@@ -261,7 +261,7 @@ function put_router(color, side)
 	set_defaults()
 
 	if side == "long" then
-		ride_degrees(LH.long_dg, -20)
+		ride_degrees(LH.long_dg - H.put_router.backlongnoride_dg, -20)
 	end
 end
 
@@ -512,6 +512,8 @@ function main2()
 				end
 			else
 				routers[3] = "black"
+				get_router(3)
+				put_router("red", "long")
 			end
 		end
 		
@@ -519,6 +521,11 @@ function main2()
 	end
 	get_available_router({1,2,3,4,5,6})
 	get_wire(1)
+
+	-- HOTEL? - TRIVAGO
+	-- goto_point(0)
+	-- s_goto_point(9)
+
 	put_router("green", "short")
 	put_wire(2)
 	goto_point("14")
@@ -659,13 +666,13 @@ function swap_router()
 	set_lift("back_take")
 	ride_degrees_steer(50, 50, 20)
 	set_lift("up")
-	ride_degrees_steer(50, 20, -20)
+	-- ride_degrees_steer(50, 20, -20)
 	ride_degrees_steer(-50, 790, 40) --megaturn
 	set_lift("take_router")
-	ride_degrees_steer(0, 150 + 10, 20)
+	ride_degrees_steer(0, 180, 20)
 	set_lift("up")
 	ride_degrees_steer(-100, 255, 20)
-	line_degrees(120)
+	line_degrees(90)
 end
 
 function test_backtake()
@@ -678,5 +685,7 @@ function test_backfront()
 	swap_router()
 end
 
---test_backfront()
+-- test_backfront()
 main2()
+-- set_defaults()
+--ride_degrees(2400, -60) 
