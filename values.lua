@@ -54,7 +54,7 @@ H.line = {
 
 -- #Line detection
 H.colors = {
-	white_pt = 50,
+	white_pt = 40,
 	grey_pt = 35,
 	black_pt = 15 + 3,
 }
