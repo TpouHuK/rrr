@@ -52,6 +52,7 @@ fn minf32(a: f32, b: f32) -> f32 {
 enum TypeOfMove {
     GotoPoint(Vec<graph::MoveAction>),
     LineDegrees((i32)),
+    RightLineDegrees((i32)),
     Degrees(i32, i32),
     RightOutLine,
     JoystickWrite,
@@ -70,6 +71,7 @@ fn main() {
     let is_goto_running_c7 = is_goto_running.clone();
     let is_goto_running_c8 = is_goto_running.clone();
     let is_goto_running_c9 = is_goto_running.clone();
+    let is_goto_running_c10 = is_goto_running.clone();
 
     let (send_ch, receive_ch) = std::sync::mpsc::channel();
     let send_ch2 = send_ch.clone();
@@ -79,6 +81,7 @@ fn main() {
     let send_ch6 = send_ch.clone();
     let send_ch7 = send_ch.clone();
     let send_ch8 = send_ch.clone();
+    let send_ch9 = send_ch.clone();
 
     let mut kpidb = Arc::new(Mutex::new(line::LineArgs{
     pf_coff: 0.0,
@@ -188,6 +191,14 @@ fn main() {
                     {pidb = *kpidb.lock().unwrap()};
                     {lspeed = *klspeed.lock().unwrap()};
                     line::ride_line_degrees(pidb, &mut robot, degrees);
+                    robot.motor_pair.set_steering(0, 0);
+                },
+                TypeOfMove::RightLineDegrees(degrees) => {
+                    let mut pidb;
+                    let mut lspeed;
+                    {pidb = *kpidb.lock().unwrap()};
+                    {lspeed = *klspeed.lock().unwrap()};
+                    line::ride_outer_line_degrees(pidb, &mut robot, degrees);
                     robot.motor_pair.set_steering(0, 0);
                 },
                 TypeOfMove::RightOutLine => {
@@ -508,6 +519,16 @@ fn main() {
             Ok(())
         };
 
+        let ride_right_line_degrees = move |_c: Context, degrees: i32| {
+            let (mutex, condvar) = &*is_goto_running_c10;
+            {
+                let mut running = mutex.lock().unwrap();
+                *running = true;
+            }
+            send_ch9.send(TypeOfMove::RightLineDegrees(degrees)).unwrap();
+            Ok(())
+        };
+
         let ride_outer_line_left_stop = move |_c: Context, _: ()| {
             let (mutex, condvar) = &*is_goto_running_c7;
             {
@@ -567,6 +588,7 @@ fn main() {
         create_lua_func!(lua_ctx, goto_point, "r_goto_point");
         create_lua_func!(lua_ctx, rotate_to_point, "r_rotate_to_point");
         create_lua_func!(lua_ctx, ride_line_degrees, "r_ride_line_degrees");
+        create_lua_func!(lua_ctx, ride_right_line_degrees, "r_ride_right_line_degrees");
         create_lua_func!(lua_ctx, ride_outer_line_left_stop, "r_rolls");
         create_lua_func!(lua_ctx, ride_degrees, "r_ride_degrees");
         create_lua_func!(lua_ctx, wait_till_arrival, "r_wait_till_arrival");

@@ -85,21 +85,38 @@ function has_value (tab, val)
 end
 
 function get_color()
-	h, s, v = r_get_cs_hsv()
-	if (s < 50) or (v < 30) then
-		return "none"
+	h1, s1, v1 = r_get_cs_hsv()
+	h2, s2, v2 = r_get_cs_hsv()
+	h3, s3, v3 = r_get_cs_hsv()
+	h4, s4, v4 = r_get_cs_hsv()
+	h5, s5, v5 = r_get_cs_hsv()
+	-- print(tostring(h1)..", "..tostring(s1)..", "..tostring(v1))
+	-- print(tostring(h2)..", "..tostring(s2)..", "..tostring(v2))
+	-- print(tostring(h3)..", "..tostring(s3)..", "..tostring(v3))
+	-- print(tostring(h4)..", "..tostring(s4)..", "..tostring(v4))
+	-- print(tostring(h5)..", "..tostring(s5)..", "..tostring(v5))
+	
+	h = (h1 + h2 + h3 + h4 + h5) / 5
+	s = (s1 + s2 + s3 + s4 + s5) / 5
+	v = (v1 + v2 + v3 + v4 + v5) / 5
+
+	if (s < 100) or (v < 100) then -- 50/30, changed from this
+	      return "none"
 	end
-	if (h < 30) or (h > 330)then
-		return "red"
+	if (h < 30) then
+	      return "yellow"
 	end
-	if (h < 90) then
-		return "yellow"
+	if (h < 130) and (90 > h) then
+	      return "yellow"
 	end
-	if (h < 150) then
-		return "green"
+	if (h < 200) then
+	      return "green"
 	end
 	if (h < 270) then
-		return "blue"
+	      return "blue"
+	end
+	if (h > 330) then
+		return "red"
 	end
 	return "none"
 end
@@ -116,7 +133,7 @@ function start_line_ride()
 	setup_transport_line()
 	r_rolls()
 	read_markers()
-	--fake_read()
+	-- fake_read()
 	r_wait_till_arrival()
 	set_defaults()
 	ride_degrees(100)
@@ -354,7 +371,7 @@ end
 
 
 function fake_read()
-	current_colors_i = {red=1, blue=2, green=3, yellow=4}
+	current_colors_i = {red=3, blue=1, green=4, yellow=2}
 end
 
 function start()
@@ -368,9 +385,9 @@ function finish()
 	-- s_goto_point("14")
 	goto_point("32")
 	rotate_to_point(33)
-	-- set_lift("finish")
-	-- ride_degrees_steer(100, FINISH_DEGREES_ROTATE)
-	-- ride_degrees(FINISH_DEGREES, -100)
+	set_lift("finish")
+	ride_degrees_steer(100, H.finish.rotate_dg)
+	ride_degrees(H.finish.forward_dg, -100)
 end
 
 function print_routers()
@@ -428,6 +445,7 @@ end
 
 function main2()
 	print_smile()
+	r_wait_center()
 	set_defaults()
 	start()
 
@@ -685,7 +703,36 @@ function test_backfront()
 	swap_router()
 end
 
--- test_backfront()
+function read_h()
+	while true do
+		h, s, v = r_get_cs_hsv()
+		print(h, s, v)
+  		print(get_color())
+		sleep(1)
+		print("==========================")
+	end
+end
+
+function get_marker_data()
+	set_defaults()
+	start_degrees_ride()
+	setup_transport_line()
+	r_rolls()
+
+	while true do
+		h, s, v = r_get_cs_hsv()
+		print(tostring(h)..", "..tostring(s)..", "..tostring(v))
+	end
+
+	r_wait_till_arrival()
+end
+
+function start_degrees_ride()
+	ride_degrees(H.start.up_dg)
+	ride_degrees_steer(-100, H.start.left_dg)
+	ride_degrees(H.start.diag_dg)
+	ride_degrees_steer(100, H.start.right_dg)
+end
+
 main2()
--- set_defaults()
---ride_degrees(2400, -60) 
+-- get_marker_data()

@@ -572,6 +572,45 @@ fn line_step(err: i32, la: LineArgs, ls: &mut LineState) -> (i32, i32) {
     return (diff as i32, speed)
 }
 
+pub fn ride_outer_line_degrees(
+    line_args: LineArgs,
+    robot: &mut RobotMoveBase,
+    degrees: i32,
+    ) {
+
+    let sl = robot.motor_pair.lmotor.get_position().unwrap();
+    let sr = robot.motor_pair.rmotor.get_position().unwrap();
+    let degrees = degrees as isize;
+
+    fn error_fun(l: i32, r: i32) -> i32{
+        r - middle_grey()
+    }
+
+    let (ls, rs) = robot.sensor_pair.get_reflected_color();
+    let error = error_fun(ls, rs);
+    let mut line_st = LineState{last_error: error, lx: 0.0, sstate: 0};
+
+    loop {
+        let (ls, rs) = robot.sensor_pair.get_reflected_color();
+        let error = error_fun(ls, rs);
+        let (diff, speed) = line_step(error, line_args, &mut line_st);
+        robot.motor_pair.set_steering(diff, speed);
+
+        let ldiff = ((robot.motor_pair.lmotor.get_position().unwrap() as i32) - sl as i32).abs();
+        let rdiff = ((robot.motor_pair.rmotor.get_position().unwrap() as i32) - sr as i32).abs();
+        let average = (ldiff + rdiff)/2;
+        if average > degrees as i32 {
+            break;
+        };
+
+        //if (((robot.motor_pair.lmotor.get_position().unwrap() as i32) - sl as i32).abs() > degrees as i32)
+        //|| (((robot.motor_pair.rmotor.get_position().unwrap() as i32) - sr as i32).abs() > degrees as i32) {
+        //    break;
+        //}
+    }
+}
+
+
 //TODO fixme
 pub fn ride_line_degrees(
     line_args: LineArgs,

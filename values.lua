@@ -8,13 +8,13 @@ H.line = {
 	-- ##Coefficients
 	-- Accurate line for actions with objects
 	accurate = {
-		pf_cf = 0.5,
-		df_cf = 0,
+		pf_cf = 0.8,
+		df_cf = 1,
 		sf_sd = 20,
 
 		ps_cf = 1,
 		ds_cf = 0,
-		ss_sd = 10,
+		ss_sd = 10 + 5,
 
 		top_pt = 700,
 		bot_pt = 50,
@@ -23,13 +23,13 @@ H.line = {
 
 	-- Fast line where we moving on long distances
 	fast = {
-		pf_cf = 0.7,
-		df_cf = 65,
+		pf_cf = 0.6,
+		df_cf = 55,
 		sf_sd = 80,
 		      
 		ps_cf = 2.0,
 		ds_cf = 0,
-		ss_sd = 20,
+		ss_sd = 20 + 5,
 		      
 		top_pt = 500,
 		bot_pt = 200,
@@ -39,12 +39,12 @@ H.line = {
 	-- Typical line to move around without speed/precision
 	trans = {
 		pf_cf = 0.8,
-		df_cf = 20,
+		df_cf = 11,
 		sf_sd = 45,
 		     
 		ps_cf = 1.0,
 		ds_cf = 10,
-		ss_sd = 20,
+		ss_sd = 20 + 5,
 		     
 		top_pt = 900,
 		bot_pt = 100,
@@ -56,20 +56,21 @@ H.line = {
 H.colors = {
 	white_pt = 40,
 	grey_pt = 35,
-	black_pt = 15 + 3,
+	black_pt = 15,
 }
 
 
 -- #Magic
 H.magic = {
-	on = true ,
+	-- on = true ,
+	on = false,
 	dsc = 95,
 	rgr = 10,
 	back_take = true,
 }
 
 -- #Router color reading
-H.router_bw_limit_pt = 40
+H.router_bw_limit_pt = 60
 
 -- #Start move
 local turn_dg = 110
@@ -142,8 +143,8 @@ H.get_wire = {
 
 -- #Finish
 H.finish = {
-	rotate_dg = 48,
-	forward_dg = 700,
+	rotate_dg = 40 - 5 - 5,
+	forward_dg = 690,
 }
 
 -- #Lift setup
