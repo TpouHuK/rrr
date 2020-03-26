@@ -132,8 +132,8 @@ end
 function start_line_ride()
 	setup_transport_line()
 	r_rolls()
-	read_markers()
-	-- fake_read()
+	-- read_markers()
+	fake_read()
 	r_wait_till_arrival()
 	set_defaults()
 	ride_degrees(100)
@@ -734,5 +734,68 @@ function start_degrees_ride()
 	ride_degrees_steer(100, H.start.right_dg)
 end
 
-main2()
+function cry_in_pain()
+	print_smile()
+	r_wait_center()
+	set_defaults()
+
+
+	start()
+	goto_point("0")
+	ride_degrees(250)
+	ride_degrees_steer(-100, 280)
+	--ride_degrees(100, -30)
+	ride_degrees(900)
+
+
+	set_lift("put_wire")
+
+	sleep(1)
+	ride_degrees_steer(-100, 300)
+	sleep(1)
+	ride_degrees(80)
+	sleep(1)
+	ride_degrees_steer(100, 300)
+	sleep(1)
+	line_degrees(100)
+	sleep(1)
+
+	--ride_degrees_steer(-100, 280)
+	--set_lift("put_wire")
+	--ride_degrees_steer(100, 280)
+	
+	sleep(1)
+	set_current_pos("2", 180)
+	goto_point("3")
+	sleep(1)
+	goto_point("32")
+	set_lift("up")
+	ride_degrees(300)
+	ride_degrees(300, -30)
+	
+	sleep(1)
+	-- Cabel
+	goto_point("44")
+	rotate_to_point("39")
+	line_degrees(H.get_wire.forward_dg)
+	set_lift("take_wire")
+
+
+	-- for i=1,10 do
+		-- ride_degrees_steer(100, 5, 100)
+		-- ride_degrees_steer(100, 5, -100)
+	-- end
+
+end
+
+-- main2()
+cry_in_pain()
+
 -- get_marker_data()
+set_defaults()
+--sleep(5)
+--set_lift("up")
+-- for i=1,10 do
+	-- ride_degrees_steer(-100, 10, 100)
+	-- ride_degrees_steer(100, 10, 100)
+-- end
