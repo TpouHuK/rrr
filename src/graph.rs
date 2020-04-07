@@ -227,22 +227,24 @@ pub fn goto_point(
 
         //println!("{}, {}", diff, is_first_start);
         //println!("I:{}, O:{}", inside_edges, outside_edges);
-        if (diff > 0) && (is_first_start) {
-            //turn right inside times
-            action_array.push(MoveAction::Rotate(inside_edges + 1));
-            //println!("Turn right inside times");
-        } else if (diff > 0) && !(is_first_start) {
-            //turn right outside times
-            action_array.push(MoveAction::Rotate(outside_edges + 1));
-            //println!("Turn right outside times");
-        } else if (diff < 0) && (is_first_start) {
-            //turn left outside times
-            action_array.push(MoveAction::Rotate(-(outside_edges + 1)));
-            //println!("Turn left outside times");
-        } else if (diff < 0) && !(is_first_start) {
-            //turn left inside times
-            action_array.push(MoveAction::Rotate(-(inside_edges + 1)));
-            //println!("Turn left inside times");
+        if ((diff.abs() > 30)) {
+            if (diff > 0) && (is_first_start) {
+                //turn right inside times
+                action_array.push(MoveAction::Rotate(inside_edges + 1));
+                //println!("Turn right inside times");
+            } else if (diff > 0) && !(is_first_start) {
+                //turn right outside times
+                action_array.push(MoveAction::Rotate(outside_edges + 1));
+                //println!("Turn right outside times");
+            } else if (diff < 0) && (is_first_start) {
+                //turn left outside times
+                action_array.push(MoveAction::Rotate(-(outside_edges + 1)));
+                //println!("Turn left outside times");
+            } else if (diff < 0) && !(is_first_start) {
+                //turn left inside times
+                action_array.push(MoveAction::Rotate(-(inside_edges + 1)));
+                //println!("Turn left inside times");
+            }
         }
 
 

@@ -36,7 +36,7 @@ fn get_script() -> String {
 }
 
 fn lua_hook(_c: Context, d: Debug) -> Result<()> {
-    //println!("Line №{}", d.curr_line());
+    //println!("Line #{}", d.curr_line());
     Ok(())
 }
 
@@ -336,7 +336,7 @@ fn main() {
     let loaded_graph2 = loaded_graph.clone();
     let lua = Lua::new();
     let mut lift_motor = line::Lift::new();
-    let mut rotate_motor = line::Rotate::new();
+    //let mut rotate_motor = line::Rotate::new();
 
     let hook_triggers = HookTriggers {every_line: true, ..Default::default()};
 
@@ -504,10 +504,10 @@ fn main() {
             Ok(())
         };
         
-        let set_rotate= move |_c: Context, (sp, speed): (i32, i32)| {
-            rotate_motor.set_point(sp, speed);
-            Ok(())
-        };
+        //let set_rotate= move |_c: Context, (sp, speed): (i32, i32)| {
+            //rotate_motor.set_point(sp, speed);
+            //Ok(())
+        //};
 
         let ride_line_degrees = move |_c: Context, degrees: i32| {
             let (mutex, condvar) = &*is_goto_running_c6;
@@ -596,7 +596,7 @@ fn main() {
         create_lua_func!(lua_ctx, get_cs_hsv, "r_get_cs_hsv");
 
         create_lua_func!(lua_ctx, set_lift, "r_set_lift");
-        create_lua_func!(lua_ctx, set_rotate, "r_set_rotate");
+        //create_lua_func!(lua_ctx, set_rotate, "r_set_rotate");
 
         create_lua_func!(lua_ctx, joystick_write, "r_joystick_write");
         // create_lua_func!(lua_ctx, joystick_line, "r_joystick_line");

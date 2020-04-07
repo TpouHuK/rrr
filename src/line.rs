@@ -24,8 +24,8 @@ pub struct RobotMoveBase {
 }
 
 pub struct MotorPair {
-    pub lmotor: MediumMotor,
-    pub rmotor: MediumMotor,
+    pub lmotor: LargeMotor,
+    pub rmotor: LargeMotor,
     send_ch: mpsc::SyncSender<(i32, i32, bool, bool)>,
     //TODO add message type instead of bare tuple
 }
@@ -77,6 +77,7 @@ pub struct Rotate {
     pos: i32,
 }
 
+
 impl Lift {
     pub fn new() -> Self {
         let mut motor = match MediumMotor::new(MotorPort::OutD) {
@@ -98,9 +99,9 @@ impl Lift {
             thread::sleep(time::Duration::from_millis(10));
         }
     }
-}
+} 
 
-impl Rotate {
+/*impl Rotate {
     pub fn new() -> Self {
         let mut motor = match MediumMotor::new(MotorPort::OutA) {
             Some(motor) => motor,
@@ -141,7 +142,7 @@ impl Rotate {
         self.pos = 0;
         self.motor.set_position(0).unwrap();
     }
-}
+}*/
 
 impl ControlSensor {
     pub fn new() -> Self {
@@ -199,12 +200,12 @@ impl ControlSensor {
 impl MotorPair {
     pub fn new() -> Self {
         // Old init
-         let mut lmotor = match MediumMotor::new(MotorPort::OutB) {
+         let mut lmotor = match LargeMotor::new(MotorPort::OutB) {
             Some(motor) => motor,
             None => panic!("Left motor not found"), 
         };
 
-        let mut rmotor = match MediumMotor::new(MotorPort::OutC) {
+        let mut rmotor = match LargeMotor::new(MotorPort::OutC) {
             Some(motor) => motor,
             None => panic!("Right motor not found"), 
         }; 
@@ -220,12 +221,12 @@ impl MotorPair {
             return if a > 100 { 100 } else if a < -100 { -100 } else { a }
         }
 
-        let mut lmotor = match MediumMotor::new(MotorPort::OutB) {
+        let mut lmotor = match LargeMotor::new(MotorPort::OutB) {
             Some(motor) => motor,
             None => panic!("Left motor not found"), 
         };
 
-        let mut rmotor = match MediumMotor::new(MotorPort::OutC) {
+        let mut rmotor = match LargeMotor::new(MotorPort::OutC) {
             Some(motor) => motor,
             None => panic!("Right motor not found"), 
         };
@@ -276,15 +277,15 @@ impl MotorPair {
                 }
             }
 
-            let lc = -(cls - lmotor.get_position().unwrap() as i32);
+            let lc = (cls - lmotor.get_position().unwrap() as i32);
             let rc = (crs - rmotor.get_position().unwrap() as i32);
 
             let diff = pid.step(lc*rs - rc*ls);
 
-            let lse = limit(ls + rs.signum()*diff)*15;
-            let rse = limit(rs - ls.signum()*diff)*15;
+            let lse = limit(ls + rs.signum()*diff)*10;
+            let rse = limit(rs - ls.signum()*diff)*10;
 
-            lmotor.set_speed_sp((-lse) as isize).unwrap();
+            lmotor.set_speed_sp((lse) as isize).unwrap();
             rmotor.set_speed_sp(rse as isize).unwrap();
 
             if lse == 0 { lmotor.stop().unwrap();}
@@ -312,8 +313,8 @@ impl MotorPair {
         let rm = limit(rm);
 
         // 1560
-        self.lmotor.set_speed_sp((-(lm*15)) as isize).unwrap();
-        self.rmotor.set_speed_sp((rm*15) as isize).unwrap();
+        self.lmotor.set_speed_sp(((lm*10)) as isize).unwrap();
+        self.rmotor.set_speed_sp((rm*10) as isize).unwrap();
 
 
         if lm != 0 { self.lmotor.run_forever().unwrap(); }
